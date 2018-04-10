@@ -186,7 +186,7 @@ sub FROM_JSON {
     my $webmention = $class->new( $data_ref );
 
     if ( my $mf2_json = $data_ref->{ mf2_document_json } ) {
-        my $doc = Web::Microformats2::Document->from_json( $mf2_json );
+        my $doc = Web::Microformats2::Document->new_from_json( $mf2_json );
         $webmention->source_mf2_document( $doc );
     }
 
