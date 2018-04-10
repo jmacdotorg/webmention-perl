@@ -194,6 +194,8 @@ This software is B<alpha>; its author is still determining how it wants to work,
 
 (Honestly, the Web::Mention namespace might not even be the best place for it!)
 
+Its implementation of the authorship algorithm is I<very> incomplete. The author only got as far as being able to parse typical output from L<http://brid.gy> and then stopped. Tsk tsk.
+
 =head1 AUTHOR
 
 Jason McIntosh (jmac@jmac.org)

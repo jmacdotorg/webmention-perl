@@ -201,6 +201,47 @@ sub FROM_JSON {
 
 Web::Mention - Implementation of the IndieWeb Webmention protocol
 
+=head1 SYNOPSIS
+
+ use Web::Mention;
+
+ my $wm = Web::Mention->new(
+    source => $url_of_something_that_mentioned_a_url_of_mine,
+    target => $url_that_got_mentioned,
+ );
+
+ if ( $wm->is_verified ) {
+    my $author = $wm->author;
+    my $name;
+    if ( $author ) {
+        $name = $author->name;
+    }
+    else {
+        $name = 'somebody';
+    }
+
+    my $source = $wm->source;
+    my $target = $wm->target;
+
+    if ( $wm->type eq 'like-of' ) {
+        print "Hooray, $name likes $target!\n";
+    }
+    elsif ( $wm->type eq 'repost-of' ) {
+        print "Gadzooks, over at $source, $name reposted $target!\n";
+    }
+    elsif ( $wm->type eq 'in-reply-to' ) {
+        print "Hmm, over at $source, $name said this about $target:\n";
+        print $wm->content;
+    }
+    else {
+        print "I'll be darned, $name mentioned $target at $source!\n";
+    }
+ }
+ else {
+    print "What the heck, this so-called 'webmention' doesn't actually "
+          . "mention its target URL. The nerve!\n";
+ }
+
 =head1 DESCRIPTION
 
 This class implements the Webmention protocol, as defined by the W3C and the IndieWeb community. (See: L<https://indieweb.org/Webmention>)
