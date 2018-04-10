@@ -1,0 +1,10 @@
+DateTime
+LWP
+List::Util
+Moose
+MooseX::ClassAttribute
+MooseX::Types::URI
+Path::Class::Dir
+Test::More
+Try::Tiny
+Web::Microformats2::Parser
