@@ -6,6 +6,54 @@ These libraries are too green for proper system installers, let alone CPAN. So, 
 
 Everything here is super-duper alpha, as of mid-April 2018. The author is just starting to dogfood this stuff on an experimental branch of his own website. Anything could change.
 
+# Synopsis
+
+```
+ use Web::Mention;
+
+ # Verifying a received webmention, and working with its source content.
+ my $wm = Web::Mention->new(
+    source => $url_of_something_that_mentioned_a_url_of_mine,
+    target => $url_that_got_mentioned,
+ );
+
+ if ( $wm->is_verified ) {
+    my $author = $wm->author;
+    my $name;
+    if ( $author ) {
+        $name = $author->name;
+    }
+    else {
+        $name = 'somebody';
+    }
+
+    my $source = $wm->source;
+    my $target = $wm->target;
+
+    if ( $wm->type eq 'like' ) {
+        print "Hooray, $name likes $target!\n";
+    }
+    elsif ( $wm->type eq 'repost' ) {
+        print "Gadzooks, over at $source, $name reposted $target!\n";
+    }
+    elsif ( $wm->type eq 'comment' ) {
+        print "Hmm, over at $source, $name said this about $target:\n";
+        print $wm->content;
+    }
+    else {
+        print "I'll be darned, $name mentioned $target at $source!\n";
+    }
+ }
+ else {
+    print "What the heck, this so-called 'webmention' doesn't actually "
+          . "mention its target URL. The nerve!\n";
+ }
+
+ # Sending a webmention:
+ # ...watch this space.
+
+```
+
 # Author
 
 Jason McIntosh (jmac@jmac.org)
