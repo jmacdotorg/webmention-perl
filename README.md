@@ -36,7 +36,7 @@ Everything here is super-duper alpha, as of mid-April 2018. The author is just s
     elsif ( $wm->type eq 'repost' ) {
         print "Gadzooks, over at $source, $name reposted $target!\n";
     }
-    elsif ( $wm->type eq 'comment' ) {
+    elsif ( $wm->type eq 'reply' ) {
         print "Hmm, over at $source, $name said this about $target:\n";
         print $wm->content;
     }
