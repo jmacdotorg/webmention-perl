@@ -31,21 +31,21 @@ Everything here is super-duper alpha, as of mid-April 2018. The author is just s
     my $target = $wm->target;
 
     if ( $wm->type eq 'like' ) {
-        print "Hooray, $name likes $target!\n";
+        say "Hooray, $name likes $target!";
     }
     elsif ( $wm->type eq 'repost' ) {
-        print "Gadzooks, over at $source, $name reposted $target!\n";
+        say "Gadzooks, over at $source, $name reposted $target!";
     }
     elsif ( $wm->type eq 'reply' ) {
-        print "Hmm, over at $source, $name said this about $target:\n";
-        print $wm->content;
+        say "Hmm, over at $source, $name said this about $target:";
+        say $wm->content;
     }
     else {
-        print "I'll be darned, $name mentioned $target at $source!\n";
+        say "I'll be darned, $name mentioned $target at $source!";
     }
  }
  else {
-    print "What the heck, this so-called 'webmention' doesn't actually "
+    say "What the heck, this so-called 'webmention' doesn't actually "
           . "mention its target URL. The nerve!\n";
  }
 
