@@ -54,6 +54,10 @@ Everything here is super-duper alpha, as of mid-April 2018. The author is just s
 
 ```
 
+# Prerequisites
+
+You'll need <a href="https://github.com/jmacdotorg/microformats2-perl">Web::Microformats2</a>, which isn't on CPAN yet, and is at least as half-baked as this module. At most as half-baked. One of those.
+
 # Author
 
 Jason McIntosh (jmac@jmac.org)
