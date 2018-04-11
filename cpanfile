@@ -1,10 +1,10 @@
-DateTime
-LWP
-List::Util
-Moose
-MooseX::ClassAttribute
-MooseX::Types::URI
-Path::Class::Dir
-Test::More
-Try::Tiny
-Web::Microformats2::Parser
+requires "DateTime";
+requires "LWP";
+requires "List::Util";
+requires "Moose";
+requires "MooseX::ClassAttribute";
+requires "MooseX::Types::URI";
+requires "Path::Class::Dir";
+requires "Test::More";
+requires "Try::Tiny";
+requires "Web::Microformats2::Parser";
