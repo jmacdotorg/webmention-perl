@@ -61,3 +61,7 @@ You'll need <a href="https://github.com/jmacdotorg/microformats2-perl">Web::Micr
 # Author
 
 Jason McIntosh (jmac@jmac.org)
+
+# Other contributors
+
+The tests in `t/authorship-test-cases` are based on work by Sandeep Shetty, originally found at https://github.com/sandeepshetty/authorship-test-cases.
