@@ -6,6 +6,10 @@ use MooseX::Types::URI qw(Uri);
 use LWP;
 use DateTime;
 use Try::Tiny;
+use Types::Standard qw(Enum);
+use MooseX::Enumeration;
+use Scalar::Util;
+use Carp qw(croak);
 
 use Web::Microformats2::Parser;
 use Web::Mention::Author;
@@ -14,6 +18,13 @@ has 'source' => (
     isa => Uri,
     is => 'ro',
     required => 1,
+    coerce => 1,
+);
+
+has 'original_source' => (
+    isa => Uri,
+    is => 'ro',
+    lazy_build => 1,
     coerce => 1,
 );
 
@@ -84,6 +95,35 @@ sub _build_is_verified {
     return $self->verify;
 }
 
+sub new_from_request {
+    my $class = shift;
+
+    my ( $request ) = @_;
+
+    unless ( blessed($request) && $request->can('param') ) {
+        croak 'The argument to new_from_request must be an object that '
+              . "supports a param() method. (Got: $request)\n";
+    }
+
+    my @complaints;
+    my %new_args;
+    foreach ( qw(source target) ) {
+        if ( my $value = $request->param( $_ ) ) {
+            $new_args{ $_ } = $value;
+        }
+
+        unless ( defined $new_args{ $_ } ) {
+            push @complaints, "No param value set for $_.";
+        }
+    }
+
+    if ( @complaints ) {
+        croak join q{ }, @complaints;
+    }
+
+    return $class->new( %new_args );
+}
+
 sub verify {
     my $self = shift;
 
@@ -137,6 +177,9 @@ sub _build_type {
     elsif ( $item->get_property( 'repost-of' )) {
         return 'repost';
     }
+    elsif ( $item->get_property( 'quotation-of' )) {
+        return 'quotation';
+    }
     else {
         return 'mention';
     }
@@ -154,6 +197,19 @@ sub _build_content {
         return;
     }
 }
+
+sub _build_original_source {
+    my $self = shift;
+
+    if ( my $item = $self->source_mf2_document->get_first( 'h-entry' ) ) {
+        if ( my $url = $item->get_property( 'url' ) ) {
+            return $url;
+        }
+    }
+
+    return $self->source;
+}
+
 
 # Called by the JSON module during JSON encoding.
 # Contrary to the (required) name, returns an unblessed reference, not JSON.
@@ -206,49 +262,78 @@ Web::Mention - Implementation of the IndieWeb Webmention protocol
 =head1 SYNOPSIS
 
  use Web::Mention;
+ use Try::Tiny;
+ use v5.22;
+
+ # Define a simple handler that, given a web-request object, determines
+ # whether it contains a webmention, and reacts to it if so.
+ sub find_webmention ( $request ) {
+
+    # $request is an object that provides a 'param' method, such as
+    # Catalyst::Request or Mojo::Message::Request.
+
+    my $wm;
+    try {
+        $wm = Web::Mention->new_from_request ( $request )
+    }
+    catch {
+        say "Oops, this wasn't a webmention at all: $_";
+    };
+    return unless $wm;
+
+    if ( $wm->is_verified ) {
+        my $author = $wm->author;
+        my $name;
+        if ( $author ) {
+            $name = $author->name;
+        }
+        else {
+            $name = 'somebody';
+        }
+
+        my $source = $wm->original_source;
+        my $target = $wm->target;
+
+        if ( $wm->is_like ) {
+            say "Hooray, $name likes $target!";
+        }
+        elsif ( $wm->is_repost ) {
+            say "Gadzooks, over at $source, $name reposted $target!";
+        }
+        elsif ( $wm->is_reply ) {
+            say "Hmm, over at $source, $name said this about $target:";
+            say $wm->content;
+        }
+        else {
+            say "I'll be darned, $name mentioned $target at $source!";
+        }
+    }
+    else {
+       say "What the heck, this so-called 'webmention' doesn't actually "
+             . "mention its target URL. The nerve!";
+    }
+ }
+
+ # Manually buidling a webmention:
 
  my $wm = Web::Mention->new(
-    source => $url_of_something_that_mentioned_a_url_of_mine,
-    target => $url_that_got_mentioned,
+    source => $url_of_the_thing_that_got_mentioned,
+    target => $url_of_the_thing_that_did_the_mentioning
  );
 
- if ( $wm->is_verified ) {
-    my $author = $wm->author;
-    my $name;
-    if ( $author ) {
-        $name = $author->name;
-    }
-    else {
-        $name = 'somebody';
-    }
-
-    my $source = $wm->source;
-    my $target = $wm->target;
-
-    if ( $wm->type eq 'like-of' ) {
-        print "Hooray, $name likes $target!\n";
-    }
-    elsif ( $wm->type eq 'repost-of' ) {
-        print "Gadzooks, over at $source, $name reposted $target!\n";
-    }
-    elsif ( $wm->type eq 'in-reply-to' ) {
-        print "Hmm, over at $source, $name said this about $target:\n";
-        print $wm->content;
-    }
-    else {
-        print "I'll be darned, $name mentioned $target at $source!\n";
-    }
- }
- else {
-    print "What the heck, this so-called 'webmention' doesn't actually "
-          . "mention its target URL. The nerve!\n";
- }
+ # Sending a webmention:
+ # ...watch this space.
 
 =head1 DESCRIPTION
 
-This class implements the Webmention protocol, as defined by the W3C and the IndieWeb community. (See: L<https://indieweb.org/Webmention>)
+This class implements the Webmention protocol, as defined by the W3C and
+the IndieWeb community. (See: L<https://indieweb.org/Webmention>)
 
-An object of this class represents a single webmention, with target and source URLs. It can verify itself, determining whether or not the document found at the source URL does indeed mention the target URL. It can also use the Indieweb authorship algorithm to identify and describe the author of source document, if possible.
+An object of this class represents a single webmention, with target and
+source URLs. It can verify itself, determining whether or not the
+document found at the source URL does indeed mention the target URL. It
+can also use the Indieweb authorship algorithm to identify and describe
+the author of source document, if possible.
 
 =head1 METHODS
 
@@ -258,9 +343,26 @@ An object of this class represents a single webmention, with target and source U
 
 =item new ( source => $source_url, target => $target_url )
 
-Constructor. The B<source> and B<target> URLs are both required arguments. Either one can either be a L<URI> object, or a valid URL string.
+Basic constructor. The B<source> and B<target> URLs are both required
+arguments. Either one can either be a L<URI> object, or a valid URL
+string.
 
-Per the Webmention protocol, the B<source> URL represents the location of the document that made the mention described here, and B<target> describes the location of the document that got mentioned.
+Per the Webmention protocol, the B<source> URL represents the location
+of the document that made the mention described here, and B<target>
+describes the location of the document that got mentioned.
+
+=item new_from_request( $request_object )
+
+Convenience constructor that looks into the given web-request object for
+B<source> and B<target> parameters, and attempts to build a new
+Web::Mention object out of them.
+
+The object must provide a C<param( $param_name )> method that returns the
+value of the named HTTP parameter. So it could be a L<Catalyst::Request>
+object or a L<Mojo::Message::Request> object, for example.
+
+Throws an exception if the given argument doesn't meet this requirement,
+or if it does but does not define both required HTTP parameters.
 
 =back
 
@@ -278,9 +380,12 @@ Returns the webmention's target URL, as a L<URI> object.
 
 =item is_verified ( )
 
-Returns 1 if the webmention's source document actually does seem to mention the target URL. Otherwise returns 0.
+Returns 1 if the webmention's source document actually does seem to
+mention the target URL. Otherwise returns 0.
 
-The first time this is called on a given webmention object, it will try to fetch the source document at its designated URL. If it cannot fetch the document on this first attempt, this method returns 0.
+The first time this is called on a given webmention object, it will try
+to fetch the source document at its designated URL. If it cannot fetch
+the document on this first attempt, this method returns 0.
 
 =item type ( )
 
@@ -294,33 +399,52 @@ mention I<(default)>
 
 =item *
 
-in-reply-to
+reply
 
 =item *
 
-like-of
+like
 
 =item *
 
-repost-of
+repost
+
+=item *
+
+quotation
 
 =back
 
 =item author ( )
 
-A Web::Mention::Author object representing the author of this webmention's source document, if we're able to determine it. If not, this returns undef.
+A Web::Mention::Author object representing the author of this
+webmention's source document, if we're able to determine it. If not,
+this returns undef.
 
 =item source_html ( )
 
-The HTML of the document fetched from the source URL. If nothing got fetched successfully, returns undef.
+The HTML of the document fetched from the source URL. If nothing got
+fetched successfully, returns undef.
 
 =item source_mf2_document ( )
 
-The Web::Microformats2::Document object that resulted from parsing the source document for Microformats2 metadata. If no such result, returns undef.
+The Web::Microformats2::Document object that resulted from parsing the
+source document for Microformats2 metadata. If no such result, returns
+undef.
 
 =item content ( )
 
-The content of this webmention, if its source document exists and defines its content using Microformats2. If not, this returns undef.
+The content of this webmention, if its source document exists and
+defines its content using Microformats2. If not, this returns undef.
+
+=item original_source ( )
+
+If the document fetched from the source URL seems to point at yet
+another URL as its original source, then this returns that URL. If not,
+this has the same return value as C<source()>.
+
+(It makes this determination based on the possible presence a C<u-url>
+property in an C<h-entry> found within the source document.)
 
 =back
 
@@ -328,7 +452,8 @@ The content of this webmention, if its source document exists and defines its co
 
 Implementation of the content-fetching method is incomplete.
 
-This software is B<alpha>; its author is still determining how it wants to work, and its interface might change dramatically.
+This software is B<alpha>; its author is still determining how it wants
+to work, and its interface might change dramatically.
 
 =head1 AUTHOR
 
