@@ -267,10 +267,11 @@ Web::Mention - Implementation of the IndieWeb Webmention protocol
 
  # Define a simple handler that, given a web-request object, determines
  # whether it contains a webmention, and reacts to it if so.
- sub find_webmention ( $request ) {
+ sub find_webmention ( $ ) {
 
     # $request is an object that provides a 'param' method, such as
     # Catalyst::Request or Mojo::Message::Request.
+    my ( $request ) = @_;
 
     my $wm;
     try {

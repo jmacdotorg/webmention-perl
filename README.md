@@ -15,10 +15,11 @@ Everything here is super-duper alpha, as of mid-April 2018. The author is just s
 
  # Define a simple handler that, given a web-request object, determines
  # whether it contains a webmention, and reacts to it if so.
- sub find_webmention ( $request ) {
+ sub find_webmention ( $ ) {
 
     # $request is an object that provides a 'param' method, such as
     # Catalyst::Request or Mojo::Message::Request.
+    my ( $request ) = @_;
     
     my $wm;
     try {
