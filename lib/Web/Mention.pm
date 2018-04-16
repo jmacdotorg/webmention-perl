@@ -59,7 +59,9 @@ has 'author' => (
 );
 
 has 'type' => (
-    isa => 'Str',
+    isa => Enum[qw(reply like repost quotation mention)],
+    traits => ['Enumeration'],
+    handles => [qw(is_reply is_like is_repost is_quotation is_mention)],
     is => 'ro',
     lazy_build => 1,
 );
