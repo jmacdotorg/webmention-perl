@@ -78,65 +78,69 @@ the author of source document, if possible.
 
 ## Class Methods
 
-- new ( source => $source\_url, target => $target\_url )
+### new
 
-    Basic constructor. The **source** and **target** URLs are both required
-    arguments. Either one can either be a [URI](https://metacpan.org/pod/URI) object, or a valid URL
-    string.
+    $wm = Web::Mention->new( source => $source_url, target => $target_url );
 
-    Per the Webmention protocol, the **source** URL represents the location
-    of the document that made the mention described here, and **target**
-    describes the location of the document that got mentioned.
+Basic constructor. The **source** and **target** URLs are both required
+arguments. Either one can either be a [URI](https://metacpan.org/pod/URI) object, or a valid URL
+string.
 
-- new\_from\_request( $request\_object )
+Per the Webmention protocol, the **source** URL represents the location
+of the document that made the mention described here, and **target**
+describes the location of the document that got mentioned.
 
-    Convenience constructor that looks into the given web-request object for
-    **source** and **target** parameters, and attempts to build a new
-    Web::Mention object out of them.
+### new\_from\_request
 
-    The object must provide a `param( $param_name )` method that returns the
-    value of the named HTTP parameter. So it could be a [Catalyst::Request](https://metacpan.org/pod/Catalyst::Request)
-    object or a [Mojo::Message::Request](https://metacpan.org/pod/Mojo::Message::Request) object, for example.
+    $wm = Web::Mention->new_from_request( $request_object );
 
-    Throws an exception if the given argument doesn't meet this requirement,
-    or if it does but does not define both required HTTP parameters.
+Convenience constructor that looks into the given web-request object for
+**source** and **target** parameters, and attempts to build a new
+Web::Mention object out of them.
+
+The object must provide a `param( $param_name )` method that returns the
+value of the named HTTP parameter. So it could be a [Catalyst::Request](https://metacpan.org/pod/Catalyst::Request)
+object or a [Mojo::Message::Request](https://metacpan.org/pod/Mojo::Message::Request) object, for example.
+
+Throws an exception if the given argument doesn't meet this requirement,
+or if it does but does not define both required HTTP parameters.
 
 ## Object Methods
 
-- source
+### source
 
-        $source_url = $wm->source;
+    $source_url = $wm->source;
 
-    Returns the webmention's source URL, as a [URI](https://metacpan.org/pod/URI) object.
+Returns the webmention's source URL, as a [URI](https://metacpan.org/pod/URI) object.
 
-- target
+### target
 
-        $target_url = $wm->target;
+    $target_url = $wm->target;
 
-    Returns the webmention's target URL, as a [URI](https://metacpan.org/pod/URI) object.
+Returns the webmention's target URL, as a [URI](https://metacpan.org/pod/URI) object.
 
-- is\_verified
+### is\_verified
 
-        $bool = $wm->is_verified;
+    $bool = $wm->is_verified;
 
-    Returns 1 if the webmention's source document actually does seem to
-    mention the target URL. Otherwise returns 0.
+Returns 1 if the webmention's source document actually does seem to
+mention the target URL. Otherwise returns 0.
 
-    The first time this is called on a given webmention object, it will try
-    to fetch the source document at its designated URL. If it cannot fetch
-    the document on this first attempt, this method returns 0.
+The first time this is called on a given webmention object, it will try
+to fetch the source document at its designated URL. If it cannot fetch
+the document on this first attempt, this method returns 0.
 
-- type
+### type
 
-        $type = $wm->type;
+    $type = $wm->type;
 
-    The type of webmention this is. One of:
+The type of webmention this is. One of:
 
-    - mention _(default)_
-    - reply
-    - like
-    - repost
-    - quotation
+- mention _(default)_
+- reply
+- like
+- repost
+- quotation
 
 ### author
 
@@ -204,11 +208,3 @@ This software is Copyright (c) 2018 by Jason McIntosh.
 This is free software, licensed under:
 
     The MIT (X11) License
-
-# POD ERRORS
-
-Hey! **The above document had some coding errors, which are explained below:**
-
-- Around line 424:
-
-    You forgot a '=back' before '=head3'

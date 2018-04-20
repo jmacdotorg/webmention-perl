@@ -14,7 +14,7 @@ qw(
 h-entry_with_u-author.html no_h-card.html h-entry_with_rel-author.html h-card_with_u-url_equal_to_u-uid_equal_to_self.html h-card_with_u-url_equal_to_self.html h-feed_with_u-author.html h-card_with_u-url_that_is_also_rel-me.html
 );
 
-my $test_dir = Path::Class::Dir->new( "$FindBin::Bin/authorship-test-cases");
+my $test_dir = Path::Class::Dir->new( "$FindBin::Bin/authorship_test_cases");
 
 foreach ( $test_dir->children ) {
     handle_file($_) if /html$/;
