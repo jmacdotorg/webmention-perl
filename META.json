@@ -64,6 +64,17 @@
       }
    },
    "release_status" : "unstable",
+   "resources" : {
+      "bugtracker" : {
+         "web" : "https://github.com/jmacdotorg/webmention-perl/issues"
+      },
+      "homepage" : "https://github.com/jmacdotorg/webmention-perl",
+      "repository" : {
+         "type" : "git",
+         "url" : "git://github.com/jmacdotorg/webmention-perl.git",
+         "web" : "https://github.com/jmacdotorg/webmention-perl"
+      }
+   },
    "version" : "0.1",
    "x_contributors" : [
       "Jason McIntosh <jmac@jmac.org>"
