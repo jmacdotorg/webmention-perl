@@ -470,7 +470,7 @@ to work, and its interface might change dramatically.
 =head1 SUPPORT
 
 To file issues or submit pull requests, please see L<this module's
-repository on GitHub|https://github.com/jmacdotorg/microformats2-perl>.
+repository on GitHub|https://github.com/jmacdotorg/webmention-perl>.
 
 The author also welcomes any direct questions about this module via email.
 
