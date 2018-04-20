@@ -164,38 +164,59 @@ Web::Mention::Author - The author of a webmention's source document
 
 =head1 DESCRIPTION
 
-An object of this class represents the author of a webmention -- or, more specifically, the author of the document that a given webmention points to as its source.
+An object of this class represents the author of a webmention -- or,
+more specifically, the author of the document that a given webmention
+points to as its source.
 
-It implements the IndieWeb I<authorship protocol>, as defined here: L<https://indieweb.org/authorship#How_to_determine>
+It implements the IndieWeb I<authorship protocol>, as defined here:
+L<https://indieweb.org/authorship#How_to_determine>
 
-It is not expected that you'll build objects of this class yourself. Rather, you'll receive and query them by way of the C<author()> method of Web::Mention objects.
+It is not expected that you'll build objects of this class yourself.
+Rather, you'll receive and query them by way of the C<author()> method
+of Web::Mention objects.
 
 =head1 METHODS
 
 =head2 Object Methods
 
-=over
+=head3 name
 
-=item name ( )
+ $name = $author->name;
 
 Returns the author's name.
 
-=item url ( )
+=head3 url
+
+ $author_url = $author->url;
 
 Returns the author's URL as a L<URI> object, or undef.
 
-=item photo ( )
+=head3 photo
+
+ $photo_url = $author->photo;
 
 Returns the author's photo (avatar) as a L<URI> object, or undef.
 
 =head1 NOTES AND BUGS
 
-This software is B<alpha>; its author is still determining how it wants to work, and its interface might change dramatically.
+This software is B<alpha>; its author is still determining how it wants
+to work, and its interface might change dramatically.
 
-(Honestly, the Web::Mention namespace might not even be the best place for it!)
+(Honestly, the Web::Mention namespace might not even be the best place
+for it!)
 
-Its implementation of the authorship algorithm is I<very> incomplete. The author only got as far as being able to parse typical output from L<http://brid.gy> and then stopped. Tsk tsk.
+Its implementation of the authorship algorithm is I<very> incomplete.
+The author only got as far as being able to parse typical output from
+L<http://brid.gy> and then stopped. Tsk tsk.
 
 =head1 AUTHOR
 
 Jason McIntosh (jmac@jmac.org)
+
+=head1 COPYRIGHT AND LICENSE
+
+This software is Copyright (c) 2018 by Jason McIntosh.
+
+This is free software, licensed under:
+
+  The MIT (X11) License

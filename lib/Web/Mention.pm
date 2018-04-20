@@ -14,6 +14,8 @@ use Carp qw(croak);
 use Web::Microformats2::Parser;
 use Web::Mention::Author;
 
+our $VERSION = '0.1';
+
 has 'source' => (
     isa => Uri,
     is => 'ro',
@@ -263,56 +265,51 @@ Web::Mention - Implementation of the IndieWeb Webmention protocol
 
  use Web::Mention;
  use Try::Tiny;
- use v5.22;
+ use v5.10;
 
- # Define a simple handler that, given a web-request object, determines
- # whether it contains a webmention, and reacts to it if so.
- sub find_webmention ( $ ) {
+ # Building a webmention from an incoming web request:
 
-    # $request is an object that provides a 'param' method, such as
-    # Catalyst::Request or Mojo::Message::Request.
-    my ( $request ) = @_;
+ my $wm;
+ try {
+     # $request can be any object that provides a 'param' method, such as
+     # Catalyst::Request or Mojo::Message::Request.
+     $wm = Web::Mention->new_from_request ( $request )
+ }
+ catch {
+     say "Oops, this wasn't a webmention at all: $_";
+ };
+ return unless $wm;
 
-    my $wm;
-    try {
-        $wm = Web::Mention->new_from_request ( $request )
-    }
-    catch {
-        say "Oops, this wasn't a webmention at all: $_";
-    };
-    return unless $wm;
+ if ( $wm->is_verified ) {
+     my $author = $wm->author;
+     my $name;
+     if ( $author ) {
+         $name = $author->name;
+     }
+     else {
+         $name = 'somebody';
+     }
 
-    if ( $wm->is_verified ) {
-        my $author = $wm->author;
-        my $name;
-        if ( $author ) {
-            $name = $author->name;
-        }
-        else {
-            $name = 'somebody';
-        }
+     my $source = $wm->original_source;
+     my $target = $wm->target;
 
-        my $source = $wm->original_source;
-        my $target = $wm->target;
-
-        if ( $wm->is_like ) {
-            say "Hooray, $name likes $target!";
-        }
-        elsif ( $wm->is_repost ) {
-            say "Gadzooks, over at $source, $name reposted $target!";
-        }
-        elsif ( $wm->is_reply ) {
-            say "Hmm, over at $source, $name said this about $target:";
-            say $wm->content;
-        }
-        else {
-            say "I'll be darned, $name mentioned $target at $source!";
-        }
-    }
-    else {
-       say "What the heck, this so-called 'webmention' doesn't actually "
-             . "mention its target URL. The nerve!";
-    }
+     if ( $wm->is_like ) {
+         say "Hooray, $name likes $target!";
+     }
+     elsif ( $wm->is_repost ) {
+         say "Gadzooks, over at $source, $name reposted $target!";
+     }
+     elsif ( $wm->is_reply ) {
+         say "Hmm, over at $source, $name said this about $target:";
+         say $wm->content;
+     }
+     else {
+         say "I'll be darned, $name mentioned $target at $source!";
+     }
+ }
+ else {
+    say "This webmention doesn't actually mention its target URL, "
+        . "so it is not verified.";
  }
 
  # Manually buidling a webmention:
@@ -371,15 +368,21 @@ or if it does but does not define both required HTTP parameters.
 
 =over
 
-=item source ( )
+=item source
+
+ $source_url = $wm->source;
 
 Returns the webmention's source URL, as a L<URI> object.
 
-=item target ( )
+=item target
+
+ $target_url = $wm->target;
 
 Returns the webmention's target URL, as a L<URI> object.
 
-=item is_verified ( )
+=item is_verified
+
+ $bool = $wm->is_verified;
 
 Returns 1 if the webmention's source document actually does seem to
 mention the target URL. Otherwise returns 0.
@@ -388,7 +391,9 @@ The first time this is called on a given webmention object, it will try
 to fetch the source document at its designated URL. If it cannot fetch
 the document on this first attempt, this method returns 0.
 
-=item type ( )
+=item type
+
+ $type = $wm->type;
 
 The type of webmention this is. One of:
 
@@ -416,29 +421,39 @@ quotation
 
 =back
 
-=item author ( )
+=head3 author
+
+ $author = $wm->author;
 
 A Web::Mention::Author object representing the author of this
 webmention's source document, if we're able to determine it. If not,
 this returns undef.
 
-=item source_html ( )
+=head3 source_html
+
+ $html = $wm->source_html;
 
 The HTML of the document fetched from the source URL. If nothing got
 fetched successfully, returns undef.
 
-=item source_mf2_document ( )
+=head3 source_mf2_document
 
-The Web::Microformats2::Document object that resulted from parsing the
+ $mf2_doc = $wm->source_mf2_document;
+
+The L<Web::Microformats2::Document> object that resulted from parsing the
 source document for Microformats2 metadata. If no such result, returns
 undef.
 
-=item content ( )
+=head3 content
+
+ $content = $wm->content;
 
 The content of this webmention, if its source document exists and
 defines its content using Microformats2. If not, this returns undef.
 
-=item original_source ( )
+=head3 original_source
+
+ $original_url = $wm->original_source;
 
 If the document fetched from the source URL seems to point at yet
 another URL as its original source, then this returns that URL. If not,
@@ -447,8 +462,6 @@ this has the same return value as C<source()>.
 (It makes this determination based on the possible presence a C<u-url>
 property in an C<h-entry> found within the source document.)
 
-=back
-
 =head1 NOTES AND BUGS
 
 Implementation of the content-fetching method is incomplete.
@@ -456,7 +469,21 @@ Implementation of the content-fetching method is incomplete.
 This software is B<alpha>; its author is still determining how it wants
 to work, and its interface might change dramatically.
 
+=head1 SUPPORT
+
+To file issues or submit pull requests, please see L<this module's
+repository on GitHub|https://github.com/jmacdotorg/microformats2-perl>.
+
+The author also welcomes any direct questions about this module via email.
+
 =head1 AUTHOR
 
 Jason McIntosh (jmac@jmac.org)
 
+=head1 COPYRIGHT AND LICENSE
+
+This software is Copyright (c) 2018 by Jason McIntosh.
+
+This is free software, licensed under:
+
+  The MIT (X11) License

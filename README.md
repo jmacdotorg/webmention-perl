@@ -11,60 +11,55 @@ Everything here is super-duper alpha, as of mid-April 2018. The author is just s
 ```
  use Web::Mention;
  use Try::Tiny;
- use v5.22;
+ use v5.10;
 
- # Define a simple handler that, given a web-request object, determines
- # whether it contains a webmention, and reacts to it if so.
- sub find_webmention ( $ ) {
+ # Building a webmention from an incoming web request:
 
-    # $request is an object that provides a 'param' method, such as
-    # Catalyst::Request or Mojo::Message::Request.
-    my ( $request ) = @_;
-    
-    my $wm;
-    try {
-        $wm = Web::Mention->new_from_request ( $request )
-    }
-    catch {
-        say "Oops, this wasn't a webmention at all: $_";
-    };
-    return unless $wm;
- 
-    if ( $wm->is_verified ) {
-        my $author = $wm->author;
-        my $name;
-        if ( $author ) {
-            $name = $author->name;
-        }
-        else {
-            $name = 'somebody';
-        }
+ my $wm;
+ try {
+     # $request can be any object that provides a 'param' method, such as
+     # Catalyst::Request or Mojo::Message::Request.
+     $wm = Web::Mention->new_from_request ( $request )
+ }
+ catch {
+     say "Oops, this wasn't a webmention at all: $_";
+ };
+ return unless $wm;
 
-        my $source = $wm->original_source;
-        my $target = $wm->target;
+ if ( $wm->is_verified ) {
+     my $author = $wm->author;
+     my $name;
+     if ( $author ) {
+         $name = $author->name;
+     }
+     else {
+         $name = 'somebody';
+     }
 
-        if ( $wm->is_like ) {
-            say "Hooray, $name likes $target!";
-        }
-        elsif ( $wm->is_repost ) {
-            say "Gadzooks, over at $source, $name reposted $target!";
-        }
-        elsif ( $wm->is_reply ) {
-            say "Hmm, over at $source, $name said this about $target:";
-            say $wm->content;
-        }
-        else {
-            say "I'll be darned, $name mentioned $target at $source!";
-        }
-    }
-    else {
-       say "What the heck, this so-called 'webmention' doesn't actually "
-             . "mention its target URL. The nerve!";
-    }
+     my $source = $wm->original_source;
+     my $target = $wm->target;
+
+     if ( $wm->is_like ) {
+         say "Hooray, $name likes $target!";
+     }
+     elsif ( $wm->is_repost ) {
+         say "Gadzooks, over at $source, $name reposted $target!";
+     }
+     elsif ( $wm->is_reply ) {
+         say "Hmm, over at $source, $name said this about $target:";
+         say $wm->content;
+     }
+     else {
+         say "I'll be darned, $name mentioned $target at $source!";
+     }
+ }
+ else {
+    say "This webmention doesn't actually mention its target URL, "
+        . "so it is not verified.";
  }
 
  # Manually buidling a webmention:
- 
+
  my $wm = Web::Mention->new(
     source => $url_of_the_thing_that_got_mentioned,
     target => $url_of_the_thing_that_did_the_mentioning
