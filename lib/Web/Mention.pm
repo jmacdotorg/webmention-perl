@@ -337,9 +337,9 @@ the author of source document, if possible.
 
 =head2 Class Methods
 
-=over
+=head3 new
 
-=item new ( source => $source_url, target => $target_url )
+ $wm = Web::Mention->new( source => $source_url, target => $target_url );
 
 Basic constructor. The B<source> and B<target> URLs are both required
 arguments. Either one can either be a L<URI> object, or a valid URL
@@ -349,7 +349,9 @@ Per the Webmention protocol, the B<source> URL represents the location
 of the document that made the mention described here, and B<target>
 describes the location of the document that got mentioned.
 
-=item new_from_request( $request_object )
+=head3 new_from_request
+
+ $wm = Web::Mention->new_from_request( $request_object );
 
 Convenience constructor that looks into the given web-request object for
 B<source> and B<target> parameters, and attempts to build a new
@@ -362,25 +364,21 @@ object or a L<Mojo::Message::Request> object, for example.
 Throws an exception if the given argument doesn't meet this requirement,
 or if it does but does not define both required HTTP parameters.
 
-=back
-
 =head2 Object Methods
 
-=over
-
-=item source
+=head3 source
 
  $source_url = $wm->source;
 
 Returns the webmention's source URL, as a L<URI> object.
 
-=item target
+=head3 target
 
  $target_url = $wm->target;
 
 Returns the webmention's target URL, as a L<URI> object.
 
-=item is_verified
+=head3 is_verified
 
  $bool = $wm->is_verified;
 
@@ -391,7 +389,7 @@ The first time this is called on a given webmention object, it will try
 to fetch the source document at its designated URL. If it cannot fetch
 the document on this first attempt, this method returns 0.
 
-=item type
+=head3 type
 
  $type = $wm->type;
 
