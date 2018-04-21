@@ -75,9 +75,9 @@
          "web" : "https://github.com/jmacdotorg/webmention-perl"
       }
    },
-   "version" : "0.1",
+   "version" : "0.2",
    "x_contributors" : [
-      "Jason McIntosh <jmac@jmac.org>"
+      "JmacDotOrg <jmac@jmac.org>"
    ],
    "x_serialization_backend" : "JSON::PP version 2.27300_01"
 }

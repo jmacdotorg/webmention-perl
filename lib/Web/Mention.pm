@@ -14,7 +14,7 @@ use Carp qw(croak);
 use Web::Microformats2::Parser;
 use Web::Mention::Author;
 
-our $VERSION = '0.1';
+our $VERSION = '0.2';
 
 has 'source' => (
     isa => Uri,
