@@ -48,6 +48,12 @@ has 'target' => (
     coerce => 1,
 );
 
+has 'is_tested' => (
+    isa => 'Bool',
+    is => 'rw',
+    default => 0,
+);
+
 has 'is_verified' => (
     isa => 'Bool',
     is => 'ro',
@@ -129,11 +135,12 @@ sub new_from_request {
 sub verify {
     my $self = shift;
 
+    $self->is_tested(1);
     my $response = $self->ua->get( $self->source );
 
     if ($response->content =~ $self->target ) {
         $self->time_verified( DateTime->now );
-        $self->source_html( $response->content );
+        $self->source_html( $response->decoded_content );
         return 1;
     }
     else {
@@ -219,18 +226,26 @@ sub _build_original_source {
 sub TO_JSON {
     my $self = shift;
 
-    return {
+    my $return_ref = {
         source => $self->source->as_string,
         target => $self->target->as_string,
-        is_verified => $self->is_verified,
         time_received => $self->time_received->epoch,
-        time_verified => $self->time_verified->epoch,
-        type => $self->type,
-        mf2_document_json =>
-            $self->source_mf2_document
-            ? $self->source_mf2_document->as_json
-            : undef,
     };
+
+    if ( $self->is_tested ) {
+	$return_ref->{ is_verified } = $self->is_verified;
+	$return_ref->{ type } = $self->type;
+	$return_ref->{ time_verified} = $self->time_verified->epoch;
+	if ( $self->source_mf2_document ) {
+	    $return_ref->{ mf2_document_json } =
+		$self->source_mf2_document->as_json;
+	}
+	else {
+	    $return_ref->{ mf2_document_json } = undef;
+	}
+    }
+
+    return $return_ref;
 }
 
 # Class method to construct a Webmention object from an unblessed reference,
@@ -240,7 +255,9 @@ sub FROM_JSON {
     my ( $data_ref ) = @_;
 
     foreach ( qw( time_received time_verified ) ) {
-        $data_ref->{ $_ } = DateTime->from_epoch( epoch => $data_ref->{ $_ } );
+	if ( defined $data_ref->{ $_ } ) {
+	    $data_ref->{ $_ } = DateTime->from_epoch( epoch => $data_ref->{ $_ } );
+	}
     }
 
     my $webmention = $class->new( $data_ref );
