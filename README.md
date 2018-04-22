@@ -201,6 +201,10 @@ The author also welcomes any direct questions about this module via email.
 
 Jason McIntosh (jmac@jmac.org)
 
+# CONTRIBUTORS
+
+* Mohammad S Anwar (mohammad.anwar@yahoo.com)
+
 # COPYRIGHT AND LICENSE
 
 This software is Copyright (c) 2018 by Jason McIntosh.
