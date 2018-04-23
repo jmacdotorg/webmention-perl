@@ -14,7 +14,7 @@ use Carp qw(croak);
 use Web::Microformats2::Parser;
 use Web::Mention::Author;
 
-our $VERSION = '0.2';
+our $VERSION = '0.3';
 
 has 'source' => (
     isa => Uri,
@@ -513,6 +513,16 @@ The author also welcomes any direct questions about this module via email.
 =head1 AUTHOR
 
 Jason McIntosh (jmac@jmac.org)
+
+=head1 CONTRIBUTORS
+
+=over
+
+=item *
+
+Mohammad S Anwar (mohammad.anwar@yahoo.com)
+
+=back
 
 =head1 COPYRIGHT AND LICENSE
 
