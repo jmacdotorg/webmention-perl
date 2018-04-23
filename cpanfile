@@ -13,6 +13,7 @@ requires "List::Util";
 
 on 'test' => sub {
     requires "Test::More";
+    requires "Test::Exception";
 
     requires "Path::Class::Dir";
 };
