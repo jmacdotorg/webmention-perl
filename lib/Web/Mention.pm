@@ -103,6 +103,23 @@ sub _build_is_verified {
     return $self->verify;
 }
 
+sub BUILD {
+    my $self = shift;
+
+    my $source = $self->source->clone;
+    my $target = $self->target->clone;
+
+    foreach ( $source, $target ) {
+	$_->fragment( undef );
+    }
+
+    if ( $source->eq( $target ) ) {
+	die "Inavlid webmention; source and target have the same URL "
+	    . "($source)\n";
+    }
+
+}
+
 sub new_from_request {
     my $class = shift;
 
