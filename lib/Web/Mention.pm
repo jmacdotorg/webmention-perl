@@ -4,12 +4,14 @@ use Moose;
 use MooseX::ClassAttribute;
 use MooseX::Types::URI qw(Uri);
 use LWP;
+use HTTP::Link;
 use DateTime;
 use Try::Tiny;
 use Types::Standard qw(Enum);
 use MooseX::Enumeration;
 use Scalar::Util;
-use Carp qw(croak);
+use Carp qw(carp croak);
+use Mojo::DOM58;
 
 use Web::Microformats2::Parser;
 use Web::Mention::Author;
@@ -46,6 +48,12 @@ has 'target' => (
     is => 'ro',
     required => 1,
     coerce => 1,
+);
+
+has 'endpoint' => (
+    isa => 'Maybe[URI]',
+    is => 'ro',
+    lazy_build => 1,
 );
 
 has 'is_tested' => (
@@ -93,7 +101,7 @@ has 'content' => (
 
 class_has 'ua' => (
     isa => 'LWP::UserAgent',
-    is => 'ro',
+    is => 'rw',
     default => sub { LWP::UserAgent->new },
 );
 
@@ -163,6 +171,27 @@ sub verify {
     else {
         return 0;
     }
+}
+
+sub send {
+    my $self = shift;
+
+    my $endpoint = $self->endpoint;
+    my $source = $self->source;
+    my $target = $self->target;
+
+    unless ( $endpoint ) {
+        return 0;
+    }
+
+    # Step three: send the webmention to the target!
+    my $request = HTTP::Request->new( POST => $endpoint );
+    $request->content_type('application/x-www-form-urlencoded');
+    $request->content("source=>$source&target=>$target");
+
+    my $response = $self->ua->request($request);
+
+    return $response->is_success;
 }
 
 sub _build_source_mf2_document {
@@ -236,6 +265,50 @@ sub _build_original_source {
     return $self->source;
 }
 
+sub _build_endpoint {
+    my $self = shift;
+
+    my $endpoint;
+    my $source = $self->source;
+    my $target = $self->target;
+
+    # Is it in the Link HTTP header?
+    my $response = $self->ua->get( $target );
+    my @header_links = HTTP::Link->parse( $response->header( 'Link' ) );
+    foreach (@header_links ) {
+        if ($_->{relation} eq 'webmention') {
+            $endpoint = $_->{iri};
+        }
+    }
+
+    # Is it in the HTML?
+    unless ( $endpoint ) {
+        if ( $response->header( 'Content-type' ) eq 'text/html' ) {
+            my $dom = Mojo::DOM58->new( $response->decoded_content );
+            my $nodes_ref = $dom->find('link[rel], a[rel]');
+            for my $node ($nodes_ref) {
+                $endpoint = $node->attr( 'rel' );
+                last if $endpoint;
+            }
+        }
+    }
+
+    return undef unless $endpoint;
+
+    $endpoint = URI->new_abs( $endpoint, $source );
+
+    my $host = $endpoint->host;
+    if (
+        ( lc($host) eq 'localhost' ) || ( $host =~ /^127\.\d+\.\d+\.\d+$/ )
+    ) {
+        carp "Warning: $source declares an apparent loopback address "
+              . "($endpoint) as a webmention endpoint. Ignoring.";
+        return undef;
+    }
+    else {
+        return $endpoint;
+    }
+}
 
 # Called by the JSON module during JSON encoding.
 # Contrary to the (required) name, returns an unblessed reference, not JSON.
@@ -380,7 +453,9 @@ string.
 
 Per the Webmention protocol, the B<source> URL represents the location
 of the document that made the mention described here, and B<target>
-describes the location of the document that got mentioned.
+describes the location of the document that got mentioned. The two
+arguments cannot refer to the same URL (disregarding the C<#fragment>
+part of either, if present).
 
 =head3 new_from_request
 
@@ -492,6 +567,32 @@ this has the same return value as C<source()>.
 
 (It makes this determination based on the possible presence a C<u-url>
 property in an C<h-entry> found within the source document.)
+
+=head3 send
+
+ my $bool = $wm->send;
+
+Attempts to send an HTTP-request representation of this webmention to
+its target's designated webmention endpoint. This involves querying the
+target URL to discover said endpoint's URL (via the C<endpoint> object
+method), and then sending the actual webmention request via HTTP to that
+endpoint.
+
+If that whole process goes through successfully and the endpoint returns
+a success response (meaning that it has acknowledged the webmention, and
+most likely queued it for later processing), then this method returns
+true. Otherwise, it returns false.
+
+=head3 endpoint
+
+ my $uri = $wm->endpoint;
+
+Attempts to determine the webmention endpoint URL of this webmention's
+target. On success, returns a L<URI> object. On failure, returns undef.
+
+(If the endpoint is set to localhost or a loopback IP, will return undef
+and also emit a warning, because that's terribly rude behavior on the
+target's part.)
 
 =head1 NOTES AND BUGS
 
