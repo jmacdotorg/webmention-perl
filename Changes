@@ -4,6 +4,10 @@ Revision history for Web::Mention
 
 0.3 2018-04-23T14:19:45Z
 
+    - The internal author-object constructor no longer chokes if it
+    encounters author metadata that doesn't define every possible
+    property.
+
     - Constructor throws an exception if the source and target URLs are
     too similar. (Thanks to Christian Weiske for the heads-up.)
 
