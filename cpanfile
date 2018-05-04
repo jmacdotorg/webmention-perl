@@ -10,6 +10,7 @@ requires "Types::Standard";
 requires "Web::Microformats2::Parser";
 requires "Scalar::Util";
 requires "List::Util";
+requires "URI::Escape";
 
 on 'test' => sub {
     requires "Test::More";

@@ -9,12 +9,13 @@ use Try::Tiny;
 use Types::Standard qw(Enum);
 use MooseX::Enumeration;
 use Scalar::Util;
+use URI::Escape;
 use Carp qw(croak);
 
 use Web::Microformats2::Parser;
 use Web::Mention::Author;
 
-our $VERSION = '0.3';
+our $VERSION = '0.3.1';
 
 has 'source' => (
     isa => Uri,
@@ -155,7 +156,14 @@ sub verify {
     $self->is_tested(1);
     my $response = $self->ua->get( $self->source );
 
-    if ($response->content =~ $self->target ) {
+    # Search for both plain and escaped ("percent-encoded") versions of the
+    # target URL in the source doc. We search for the latter to account for
+    # sites like Tumblr, who treat outgoing hyperlinks as weird internally-
+    # pointing links that pass external URLs as query-string parameters.
+    my $target = "$self->target";
+    if ( ($response->content =~ $self->target)
+         || ($response->content =~ uri_escape( $self->target ) )
+    ) {
         $self->time_verified( DateTime->now );
         $self->source_html( $response->decoded_content );
         return 1;
