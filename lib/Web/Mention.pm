@@ -191,13 +191,22 @@ sub _build_source_mf2_document {
 sub _build_author {
     my $self = shift;
 
-    return Web::Mention::Author->new_from_mf2_document(
-        $self->source_mf2_document
-    );
+    if ( $self->source_mf2_document ) {
+        return Web::Mention::Author->new_from_mf2_document(
+            $self->source_mf2_document
+        );
+    }
+    else {
+        return;
+    }
 }
 
 sub _build_type {
     my $self = shift;
+
+    unless ( $self->source_mf2_document ) {
+        return 'mention';
+    }
 
     my $item = $self->source_mf2_document->get_first( 'h-entry' );
     return 'mention' unless $item;
@@ -221,23 +230,30 @@ sub _build_type {
 
 sub _build_content {
     my $self = shift;
+
     # XXX This is inflexible and not on-spec
+    #     Current behavior: Get an explicit content property,
+    #     or return the HTML document's title, if there is one.
 
     my $item = $self->source_mf2_document->get_first( 'h-entry' );
-    if ( $item->get_property( 'content' ) ) {
+
+    if ( $item && $item->get_property( 'content' ) ) {
         return $item->get_property( 'content' )->{value};
     }
     else {
-        return;
+        my ( $title ) = $self->source_html =~ /<\s*\btitle\b.*?>\s*(.*?)\s*</;
+        return $title;
     }
 }
 
 sub _build_original_source {
     my $self = shift;
 
-    if ( my $item = $self->source_mf2_document->get_first( 'h-entry' ) ) {
-        if ( my $url = $item->get_property( 'url' ) ) {
-            return $url;
+    if ( $self->source_mf2_document ) {
+        if ( my $item = $self->source_mf2_document->get_first( 'h-entry' ) ) {
+            if ( my $url = $item->get_property( 'url' ) ) {
+                return $url;
+            }
         }
     }
 
