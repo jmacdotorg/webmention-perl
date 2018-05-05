@@ -180,7 +180,10 @@ sub _build_source_mf2_document {
     my $doc;
     try {
         my $parser = Web::Microformats2::Parser->new;
-        $doc = $parser->parse( $self->source_html );
+        $doc = $parser->parse(
+	    $self->source_html,
+	    url_context => $self->source,
+	);
     }
     catch {
         die "Error parsing source HTML: $_";
