@@ -12,11 +12,13 @@ use MooseX::Enumeration;
 use Scalar::Util;
 use Carp qw(carp croak);
 use Mojo::DOM58;
+use URI::Escape;
+use Carp qw(croak);
 
 use Web::Microformats2::Parser;
 use Web::Mention::Author;
 
-our $VERSION = '0.3';
+our $VERSION = '0.3.1';
 
 has 'source' => (
     isa => Uri,
@@ -163,7 +165,14 @@ sub verify {
     $self->is_tested(1);
     my $response = $self->ua->get( $self->source );
 
-    if ($response->content =~ $self->target ) {
+    # Search for both plain and escaped ("percent-encoded") versions of the
+    # target URL in the source doc. We search for the latter to account for
+    # sites like Tumblr, who treat outgoing hyperlinks as weird internally-
+    # pointing links that pass external URLs as query-string parameters.
+    my $target = "$self->target";
+    if ( ($response->content =~ $self->target)
+         || ($response->content =~ uri_escape( $self->target ) )
+    ) {
         $self->time_verified( DateTime->now );
         $self->source_html( $response->decoded_content );
         return 1;
@@ -201,7 +210,10 @@ sub _build_source_mf2_document {
     my $doc;
     try {
         my $parser = Web::Microformats2::Parser->new;
-        $doc = $parser->parse( $self->source_html );
+        $doc = $parser->parse(
+	    $self->source_html,
+	    url_context => $self->source,
+	);
     }
     catch {
         die "Error parsing source HTML: $_";
@@ -212,13 +224,22 @@ sub _build_source_mf2_document {
 sub _build_author {
     my $self = shift;
 
-    return Web::Mention::Author->new_from_mf2_document(
-        $self->source_mf2_document
-    );
+    if ( $self->source_mf2_document ) {
+        return Web::Mention::Author->new_from_mf2_document(
+            $self->source_mf2_document
+        );
+    }
+    else {
+        return;
+    }
 }
 
 sub _build_type {
     my $self = shift;
+
+    unless ( $self->source_mf2_document ) {
+        return 'mention';
+    }
 
     my $item = $self->source_mf2_document->get_first( 'h-entry' );
     return 'mention' unless $item;
@@ -242,23 +263,30 @@ sub _build_type {
 
 sub _build_content {
     my $self = shift;
+
     # XXX This is inflexible and not on-spec
+    #     Current behavior: Get an explicit content property,
+    #     or return the HTML document's title, if there is one.
 
     my $item = $self->source_mf2_document->get_first( 'h-entry' );
-    if ( $item->get_property( 'content' ) ) {
+
+    if ( $item && $item->get_property( 'content' ) ) {
         return $item->get_property( 'content' )->{value};
     }
     else {
-        return;
+        my ( $title ) = $self->source_html =~ /<\s*\btitle\b.*?>\s*(.*?)\s*</;
+        return $title;
     }
 }
 
 sub _build_original_source {
     my $self = shift;
 
-    if ( my $item = $self->source_mf2_document->get_first( 'h-entry' ) ) {
-        if ( my $url = $item->get_property( 'url' ) ) {
-            return $url;
+    if ( $self->source_mf2_document ) {
+        if ( my $item = $self->source_mf2_document->get_first( 'h-entry' ) ) {
+            if ( my $url = $item->get_property( 'url' ) ) {
+                return $url;
+            }
         }
     }
 
@@ -555,7 +583,8 @@ undef.
  $content = $wm->content;
 
 The content of this webmention, if its source document exists and
-defines its content using Microformats2. If not, this returns undef.
+defines its content using Microformats2. If not, then it returns the content
+of the source document's E<lt>titleE<gt> element, if it has one.
 
 =head3 original_source
 
