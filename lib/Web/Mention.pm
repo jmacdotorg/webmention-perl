@@ -507,7 +507,8 @@ undef.
  $content = $wm->content;
 
 The content of this webmention, if its source document exists and
-defines its content using Microformats2. If not, this returns undef.
+defines its content using Microformats2. If not, then it returns the content
+of the source document's E<lt>titleE<gt> element, if it has one.
 
 =head3 original_source
 
