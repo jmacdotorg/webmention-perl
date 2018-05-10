@@ -101,6 +101,11 @@ has 'content' => (
     lazy_build => 1,
 );
 
+has 'response' => (
+    isa => 'HTTP::Response',
+    is => 'rw',
+);
+
 class_has 'ua' => (
     isa => 'LWP::UserAgent',
     is => 'rw',
@@ -622,6 +627,16 @@ target. On success, returns a L<URI> object. On failure, returns undef.
 (If the endpoint is set to localhost or a loopback IP, will return undef
 and also emit a warning, because that's terribly rude behavior on the
 target's part.)
+
+=head3 response
+
+ my $response = $wm->response;
+
+Returns the L<HTTP::Response> object representing the response received
+by this webmention instance during its most recent attempt to send
+itself.
+
+Returns undef if this webmention instance hasn't tried to send itself.
 
 =head1 NOTES AND BUGS
 
