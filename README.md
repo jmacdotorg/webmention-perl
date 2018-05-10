@@ -52,15 +52,23 @@ Web::Mention - Implementation of the IndieWeb Webmention protocol
            . "so it is not verified.";
     }
 
-    # Manually buidling a webmention:
+    # Manually buidling and sending a webmention:
 
     $wm = Web::Mention->new(
        source => $url_of_the_thing_that_got_mentioned,
        target => $url_of_the_thing_that_did_the_mentioning
     );
 
-    # Sending a webmention:
-    # ...watch this space.
+    my $success = $wm->send;
+    if ( $success ) {
+        say "Webmention sent successfully!";
+    }
+    else {
+        say "The webmention wasn't sent successfully.";
+        say "Here's the response we got back..."
+        say $wm->response;
+    }
+    
 
 # DESCRIPTION
 
@@ -73,124 +81,12 @@ document found at the source URL does indeed mention the target URL. It
 can also use the Indieweb authorship algorithm to identify and describe
 the author of source document, if possible.
 
-# METHODS
-
-## Class Methods
-
-### new
-
-    $wm = Web::Mention->new( source => $source_url, target => $target_url );
-
-Basic constructor. The **source** and **target** URLs are both required
-arguments. Either one can either be a [URI](https://metacpan.org/pod/URI) object, or a valid URL
-string.
-
-Per the Webmention protocol, the **source** URL represents the location
-of the document that made the mention described here, and **target**
-describes the location of the document that got mentioned.
-
-### new\_from\_request
-
-    $wm = Web::Mention->new_from_request( $request_object );
-
-Convenience constructor that looks into the given web-request object for
-**source** and **target** parameters, and attempts to build a new
-Web::Mention object out of them.
-
-The object must provide a `param( $param_name )` method that returns the
-value of the named HTTP parameter. So it could be a [Catalyst::Request](https://metacpan.org/pod/Catalyst::Request)
-object or a [Mojo::Message::Request](https://metacpan.org/pod/Mojo::Message::Request) object, for example.
-
-Throws an exception if the given argument doesn't meet this requirement,
-or if it does but does not define both required HTTP parameters.
-
-## Object Methods
-
-### source
-
-    $source_url = $wm->source;
-
-Returns the webmention's source URL, as a [URI](https://metacpan.org/pod/URI) object.
-
-### target
-
-    $target_url = $wm->target;
-
-Returns the webmention's target URL, as a [URI](https://metacpan.org/pod/URI) object.
-
-### is\_verified
-
-    $bool = $wm->is_verified;
-
-Returns 1 if the webmention's source document actually does seem to
-mention the target URL. Otherwise returns 0.
-
-The first time this is called on a given webmention object, it will try
-to fetch the source document at its designated URL. If it cannot fetch
-the document on this first attempt, this method returns 0.
-
-### type
-
-    $type = $wm->type;
-
-The type of webmention this is. One of:
-
-- mention _(default)_
-- reply
-- like
-- repost
-- quotation
-
-### author
-
-    $author = $wm->author;
-
-A Web::Mention::Author object representing the author of this
-webmention's source document, if we're able to determine it. If not,
-this returns undef.
-
-### source\_html
-
-    $html = $wm->source_html;
-
-The HTML of the document fetched from the source URL. If nothing got
-fetched successfully, returns undef.
-
-### source\_mf2\_document
-
-    $mf2_doc = $wm->source_mf2_document;
-
-The [Web::Microformats2::Document](https://metacpan.org/pod/Web::Microformats2::Document) object that resulted from parsing the
-source document for Microformats2 metadata. If no such result, returns
-undef.
-
-### content
-
-    $content = $wm->content;
-
-The content of this webmention, if its source document exists and
-defines its content using Microformats2. If not, this returns undef.
-
-### original\_source
-
-    $original_url = $wm->original_source;
-
-If the document fetched from the source URL seems to point at yet
-another URL as its original source, then this returns that URL. If not,
-this has the same return value as `source()`.
-
-(It makes this determination based on the possible presence a `u-url`
-property in an `h-entry` found within the source document.)
-
 # NOTES AND BUGS
 
 This software is **alpha**; its author is still determining how it wants
 to work, and its interface might change dramatically.
 
 Implementation of the content-fetching method is incomplete.
-
-The author plans to add webmention-sending functionality to this module.
-But, it isn't there yet.
 
 # SUPPORT
 
