@@ -456,15 +456,22 @@ Web::Mention - Implementation of the IndieWeb Webmention protocol
         . "so it is not verified.";
  }
 
- # Manually buidling a webmention:
+ # Manually buidling and sending a webmention:
 
  $wm = Web::Mention->new(
     source => $url_of_the_thing_that_got_mentioned,
     target => $url_of_the_thing_that_did_the_mentioning
  );
 
- # Sending a webmention:
- # ...watch this space.
+ my $success = $wm->send;
+ if ( $success ) {
+     say "Webmention sent successfully!";
+ }
+ else {
+     say "The webmention wasn't sent successfully.";
+     say "Here's the response we got back..."
+     say $wm->response;
+ }
 
 =head1 DESCRIPTION
 
@@ -512,17 +519,35 @@ or if it does but does not define both required HTTP parameters.
 
 =head2 Object Methods
 
-=head3 source
+=head3 author
 
- $source_url = $wm->source;
+ $author = $wm->author;
 
-Returns the webmention's source URL, as a L<URI> object.
+A Web::Mention::Author object representing the author of this
+webmention's source document, if we're able to determine it. If not,
+this returns undef.
 
-=head3 target
+=head3 content
 
- $target_url = $wm->target;
+ $content = $wm->content;
 
-Returns the webmention's target URL, as a L<URI> object.
+The content of this webmention, if its source document exists and
+defines its content using Microformats2. If not, then it returns the content
+of the source document's E<lt>titleE<gt> element, if it has one.
+
+B<CAUTION:> Spec-compliant implementation of this method is incomplete,
+and its API may change in near-future updates to this module.
+
+=head3 endpoint
+
+ my $uri = $wm->endpoint;
+
+Attempts to determine the webmention endpoint URL of this webmention's
+target. On success, returns a L<URI> object. On failure, returns undef.
+
+(If the endpoint is set to localhost or a loopback IP, will return undef
+and also emit a warning, because that's terribly rude behavior on the
+target's part.)
 
 =head3 is_verified
 
@@ -534,6 +559,69 @@ mention the target URL. Otherwise returns 0.
 The first time this is called on a given webmention object, it will try
 to fetch the source document at its designated URL. If it cannot fetch
 the document on this first attempt, this method returns 0.
+
+=head3 original_source
+
+ $original_url = $wm->original_source;
+
+If the document fetched from the source URL seems to point at yet
+another URL as its original source, then this returns that URL. If not,
+this has the same return value as C<source()>.
+
+(It makes this determination based on the possible presence a C<u-url>
+property in an C<h-entry> found within the source document.)
+
+=head3 response
+
+ my $response = $wm->response;
+
+Returns the L<HTTP::Response> object representing the response received
+by this webmention instance during its most recent attempt to send
+itself.
+
+Returns undef if this webmention instance hasn't tried to send itself.
+
+=head3 send
+
+ my $bool = $wm->send;
+
+Attempts to send an HTTP-request representation of this webmention to
+its target's designated webmention endpoint. This involves querying the
+target URL to discover said endpoint's URL (via the C<endpoint> object
+method), and then sending the actual webmention request via HTTP to that
+endpoint.
+
+If that whole process goes through successfully and the endpoint returns
+a success response (meaning that it has acknowledged the webmention, and
+most likely queued it for later processing), then this method returns
+true. Otherwise, it returns false.
+
+=head3 source
+
+ $source_url = $wm->source;
+
+Returns the webmention's source URL, as a L<URI> object.
+
+=head3 source_html
+
+ $html = $wm->source_html;
+
+The HTML of the document fetched from the source URL. If nothing got
+fetched successfully, returns undef.
+
+=head3 source_mf2_document
+
+ $mf2_doc = $wm->source_mf2_document;
+
+The L<Web::Microformats2::Document> object that resulted from parsing the
+source document for Microformats2 metadata. If no such result, returns
+undef.
+
+=head3 target
+
+ $target_url = $wm->target;
+
+Returns the webmention's target URL, as a L<URI> object.
 
 =head3 type
 
@@ -565,93 +653,12 @@ quotation
 
 =back
 
-=head3 author
-
- $author = $wm->author;
-
-A Web::Mention::Author object representing the author of this
-webmention's source document, if we're able to determine it. If not,
-this returns undef.
-
-=head3 source_html
-
- $html = $wm->source_html;
-
-The HTML of the document fetched from the source URL. If nothing got
-fetched successfully, returns undef.
-
-=head3 source_mf2_document
-
- $mf2_doc = $wm->source_mf2_document;
-
-The L<Web::Microformats2::Document> object that resulted from parsing the
-source document for Microformats2 metadata. If no such result, returns
-undef.
-
-=head3 content
-
- $content = $wm->content;
-
-The content of this webmention, if its source document exists and
-defines its content using Microformats2. If not, then it returns the content
-of the source document's E<lt>titleE<gt> element, if it has one.
-
-=head3 original_source
-
- $original_url = $wm->original_source;
-
-If the document fetched from the source URL seems to point at yet
-another URL as its original source, then this returns that URL. If not,
-this has the same return value as C<source()>.
-
-(It makes this determination based on the possible presence a C<u-url>
-property in an C<h-entry> found within the source document.)
-
-=head3 send
-
- my $bool = $wm->send;
-
-Attempts to send an HTTP-request representation of this webmention to
-its target's designated webmention endpoint. This involves querying the
-target URL to discover said endpoint's URL (via the C<endpoint> object
-method), and then sending the actual webmention request via HTTP to that
-endpoint.
-
-If that whole process goes through successfully and the endpoint returns
-a success response (meaning that it has acknowledged the webmention, and
-most likely queued it for later processing), then this method returns
-true. Otherwise, it returns false.
-
-=head3 endpoint
-
- my $uri = $wm->endpoint;
-
-Attempts to determine the webmention endpoint URL of this webmention's
-target. On success, returns a L<URI> object. On failure, returns undef.
-
-(If the endpoint is set to localhost or a loopback IP, will return undef
-and also emit a warning, because that's terribly rude behavior on the
-target's part.)
-
-=head3 response
-
- my $response = $wm->response;
-
-Returns the L<HTTP::Response> object representing the response received
-by this webmention instance during its most recent attempt to send
-itself.
-
-Returns undef if this webmention instance hasn't tried to send itself.
-
 =head1 NOTES AND BUGS
 
 This software is B<alpha>; its author is still determining how it wants
 to work, and its interface might change dramatically.
 
 Implementation of the content-fetching method is incomplete.
-
-The author plans to add webmention-sending functionality to this module.
-But, it isn't there yet.
 
 =head1 SUPPORT
 
