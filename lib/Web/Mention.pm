@@ -201,9 +201,10 @@ sub send {
     # Step three: send the webmention to the target!
     my $request = HTTP::Request->new( POST => $endpoint );
     $request->content_type('application/x-www-form-urlencoded');
-    $request->content("source=>$source&target=>$target");
+    $request->content("source=$source&target=$target");
 
     my $response = $self->ua->request($request);
+    $self->response( $response );
 
     return $response->is_success;
 }
@@ -307,28 +308,32 @@ sub _build_endpoint {
 
     # Is it in the Link HTTP header?
     my $response = $self->ua->get( $target );
-    my @header_links = HTTP::Link->parse( $response->header( 'Link' ) );
-    foreach (@header_links ) {
-        if ($_->{relation} eq 'webmention') {
-            $endpoint = $_->{iri};
+    if ( $response->header( 'Link' ) ) {
+        my @header_links = HTTP::Link->parse( $response->header( 'Link' ) . '' );
+        foreach (@header_links ) {
+            if ($_->{relation} eq 'webmention') {
+                $endpoint = $_->{iri};
+            }
         }
     }
 
     # Is it in the HTML?
     unless ( $endpoint ) {
-        if ( $response->header( 'Content-type' ) eq 'text/html' ) {
+        if ( $response->header( 'Content-type' ) =~ m{^text/html\b} ) {
             my $dom = Mojo::DOM58->new( $response->decoded_content );
-            my $nodes_ref = $dom->find('link[rel], a[rel]');
+            my $nodes_ref = $dom->find(
+                'link[rel~="webmention"], a[rel~="webmention"]'
+            );
             for my $node (@$nodes_ref) {
                 $endpoint = $node->attr( 'href' );
-                last if $endpoint;
+                last if defined $endpoint;
             }
         }
     }
 
-    return undef unless $endpoint;
+    return undef unless defined $endpoint;
 
-    $endpoint = URI->new_abs( $endpoint, $source );
+    $endpoint = URI->new_abs( $endpoint, $target );
 
     my $host = $endpoint->host;
     if (
