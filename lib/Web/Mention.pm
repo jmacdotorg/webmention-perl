@@ -333,7 +333,7 @@ sub _build_endpoint {
 
     return undef unless defined $endpoint;
 
-    $endpoint = URI->new_abs( $endpoint, $target );
+    $endpoint = URI->new_abs( $endpoint, $response->base );
 
     my $host = $endpoint->host;
     if (
