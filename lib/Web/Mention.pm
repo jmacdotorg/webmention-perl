@@ -314,8 +314,8 @@ sub _build_endpoint {
         if ( $response->header( 'Content-type' ) eq 'text/html' ) {
             my $dom = Mojo::DOM58->new( $response->decoded_content );
             my $nodes_ref = $dom->find('link[rel], a[rel]');
-            for my $node ($nodes_ref) {
-                $endpoint = $node->attr( 'rel' );
+            for my $node (@$nodes_ref) {
+                $endpoint = $node->attr( 'href' );
                 last if $endpoint;
             }
         }
