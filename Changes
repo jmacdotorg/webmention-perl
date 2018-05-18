@@ -2,6 +2,8 @@ Revision history for Web::Mention
 
 {{$NEXT}}
 
+    - Adding Travis config.
+
 0.4 2018-05-10T04:34:13Z
 
     - Adding support for webmention sending. (Passes all create / update / delete tests on http://webmention.rocks, as of May 9, 2018.)
