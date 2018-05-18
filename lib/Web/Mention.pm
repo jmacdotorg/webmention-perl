@@ -470,7 +470,7 @@ Web::Mention - Implementation of the IndieWeb Webmention protocol
  else {
      say "The webmention wasn't sent successfully.";
      say "Here's the response we got back..."
-     say $wm->response;
+     say $wm->response->as_string;
  }
 
 =head1 DESCRIPTION
