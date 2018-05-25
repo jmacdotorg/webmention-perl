@@ -361,16 +361,17 @@ sub TO_JSON {
     };
 
     if ( $self->is_tested ) {
-	$return_ref->{ is_verified } = $self->is_verified;
-	$return_ref->{ type } = $self->type;
-	$return_ref->{ time_verified} = $self->time_verified->epoch;
-	if ( $self->source_mf2_document ) {
-	    $return_ref->{ mf2_document_json } =
-		$self->source_mf2_document->as_json;
-	}
-	else {
-	    $return_ref->{ mf2_document_json } = undef;
-	}
+    	$return_ref->{ is_tested } = $self->is_tested;
+    	$return_ref->{ is_verified } = $self->is_verified;
+	    $return_ref->{ type } = $self->type;
+    	$return_ref->{ time_verified} = $self->time_verified->epoch;
+	    if ( $self->source_mf2_document ) {
+    	    $return_ref->{ mf2_document_json } =
+	    	$self->source_mf2_document->as_json;
+    	}
+    	else {
+	        $return_ref->{ mf2_document_json } = undef;
+    	}
     }
 
     return $return_ref;
