@@ -7,6 +7,7 @@ requires "MooseX::ClassAttribute";
 requires "MooseX::Enumeration";
 requires "MooseX::Types::URI";
 requires "Path::Class::Dir";
+requires "String::Truncate";
 requires "Try::Tiny";
 requires "Types::Standard";
 requires "Web::Microformats2", "0.3";

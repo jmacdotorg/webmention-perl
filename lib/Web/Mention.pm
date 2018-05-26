@@ -6,6 +6,7 @@ use MooseX::Types::URI qw(Uri);
 use LWP;
 use HTTP::Link;
 use DateTime;
+use String::Truncate qw(elide);
 use Try::Tiny;
 use Types::Standard qw(Enum);
 use MooseX::Enumeration;
@@ -112,6 +113,18 @@ class_has 'ua' => (
     default => sub { LWP::UserAgent->new },
 );
 
+class_has 'max_content_length' => (
+    isa => 'Num',
+    is => 'rw',
+    default => 280,
+);
+
+class_has 'content_truncation_marker' => (
+    isa => 'Str',
+    is => 'rw',
+    default => '...',
+);
+
 sub _build_is_verified {
     my $self = shift;
 
@@ -132,7 +145,6 @@ sub BUILD {
 	die "Inavlid webmention; source and target have the same URL "
 	    . "($source)\n";
     }
-
 }
 
 sub new_from_request {
@@ -270,19 +282,60 @@ sub _build_type {
 sub _build_content {
     my $self = shift;
 
-    # XXX This is inflexible and not on-spec
-    #     Current behavior: Get an explicit content property,
-    #     or return the HTML document's title, if there is one.
+    # If the source page has MF2 data *and* an h-entry,
+    # then we apply the algorithm outlined at:
+    # https://indieweb.org/comments#How_to_display
+    #
+    # Otherwise, we can't extract any semantic information about it,
+    # so we'll just offer the page's title, if there is one.
 
-    my $item = $self->source_mf2_document->get_first( 'h-entry' );
-
-    if ( $item && $item->get_property( 'content' ) ) {
-        return $item->get_property( 'content' )->{value};
+    my $item;
+    if ( $self->source_mf2_document ) {
+        $item = $self->source_mf2_document->get_first( 'h-entry' );
     }
-    else {
-        my ( $title ) = $self->source_html =~ /<\s*\btitle\b.*?>\s*(.*?)\s*</;
+
+    unless ( $item ) {
+        my $title = Mojo::DOM58->new( $self->source_html )->at('title')->text;
         return $title;
     }
+
+    my $raw_content;
+    if ( $item->get_property( 'content' ) ) {
+        $raw_content = $item->get_property( 'content' )->{ value };
+    }
+    if ( defined $raw_content ) {
+        if ( length $raw_content <= $self->max_content_length ) {
+            return $raw_content;
+        }
+    }
+
+    if ( my $summary = $item->get_property( 'summary' ) ) {
+        return $self->_truncate_content( $summary );
+    }
+
+    if ( defined $raw_content ) {
+        return $self->_truncate_content( $raw_content );
+    }
+
+    if ( my $name = $item->get_property( 'name' ) ) {
+        return $self->_truncate_content( $name );
+    }
+
+    return $self->_truncate_content( $item->value );
+}
+
+sub _truncate_content {
+    my $self = shift;
+    my ( $content ) = @_;
+
+    return elide(
+        $content,
+        $self->max_content_length,
+        {
+            at_space => 1,
+            marker => $self->content_truncation_marker,
+        },
+    );
 }
 
 sub _build_original_source {
@@ -426,17 +479,18 @@ Web::Mention - Implementation of the IndieWeb Webmention protocol
  };
 
  if ( $wm && $wm->is_verified ) {
+     my $source = $wm->original_source;
+     my $target = $wm->target;
      my $author = $wm->author;
+
      my $name;
      if ( $author ) {
          $name = $author->name;
      }
      else {
-         $name = 'somebody';
+         $name = $wm->source->host;
      }
 
-     my $source = $wm->original_source;
-     my $target = $wm->target;
 
      if ( $wm->is_like ) {
          say "Hooray, $name likes $target!";
@@ -491,7 +545,8 @@ the author of source document, if possible.
 
 =head3 new
 
- $wm = Web::Mention->new( source => $source_url, target => $target_url );
+ $wm = Web::Mention->new( source => $source_url, target => $target_url
+ );
 
 Basic constructor. The B<source> and B<target> URLs are both required
 arguments. Either one can either be a L<URI> object, or a valid URL
@@ -511,12 +566,31 @@ Convenience constructor that looks into the given web-request object for
 B<source> and B<target> parameters, and attempts to build a new
 Web::Mention object out of them.
 
-The object must provide a C<param( $param_name )> method that returns the
-value of the named HTTP parameter. So it could be a L<Catalyst::Request>
-object or a L<Mojo::Message::Request> object, for example.
+The object must provide a C<param( $param_name )> method that returns
+the value of the named HTTP parameter. So it could be a
+L<Catalyst::Request> object or a L<Mojo::Message::Request> object, for
+example.
 
 Throws an exception if the given argument doesn't meet this requirement,
 or if it does but does not define both required HTTP parameters.
+
+=head3 content_truncation_marker
+
+ Web::Mention->content_truncation_marker( $new_truncation_marker )
+
+The text that the content method will append to text that it has
+truncated, if it did truncate it. (See L<"content">.)
+
+Defaults to C<...>.
+
+=head3 max_content_length
+
+ Web::Mention->max_content_length( $new_max_length )
+
+Gets or sets the maximum length, in characters, of the content displayed
+by that object method prior to truncation. (See L<"content">.)
+
+Defaults to 280.
 
 =head2 Object Methods
 
@@ -532,12 +606,20 @@ this returns undef.
 
  $content = $wm->content;
 
-The content of this webmention, if its source document exists and
-defines its content using Microformats2. If not, then it returns the content
-of the source document's E<lt>titleE<gt> element, if it has one.
+Returns a string representing this object's best determination of the
+I<display-ready> representation of this webmention's content, based on a
+number of factors.
 
-B<CAUTION:> Spec-compliant implementation of this method is incomplete,
-and its API may change in near-future updates to this module.
+If the source document uses Microformats2 metadata and contains an
+C<h-entry> MF2 item, then returned content may come from a variety of
+its constituent properties, according to L<the IndieWeb comment-display
+algorithm|https://indieweb.org/comments#How_to_display>.
+
+If not, then it returns the content of the source document's
+E<lt>titleE<gt> element, with any further HTML stripped away.
+
+In any case, the string will get truncated if it's too long. See
+L<"max_content_length"> and L<"content_truncation_marker">.
 
 =head3 endpoint
 
@@ -614,9 +696,9 @@ fetched successfully, returns undef.
 
  $mf2_doc = $wm->source_mf2_document;
 
-The L<Web::Microformats2::Document> object that resulted from parsing the
-source document for Microformats2 metadata. If no such result, returns
-undef.
+The L<Web::Microformats2::Document> object that resulted from parsing
+the source document for Microformats2 metadata. If no such result,
+returns undef.
 
 =head3 target
 
@@ -659,14 +741,16 @@ quotation
 This software is B<alpha>; its author is still determining how it wants
 to work, and its interface might change dramatically.
 
-Implementation of the content-fetching method is incomplete.
+This library does not, at this time, support L<the proposed "Vouch"
+anti-spam extension for Webmention|https://indieweb.org/Vouch>.
 
 =head1 SUPPORT
 
 To file issues or submit pull requests, please see L<this module's
 repository on GitHub|https://github.com/jmacdotorg/webmention-perl>.
 
-The author also welcomes any direct questions about this module via email.
+The author also welcomes any direct questions about this module via
+email.
 
 =head1 AUTHOR
 
