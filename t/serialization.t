@@ -6,7 +6,7 @@ use FindBin;
 use JSON;
 
 use_ok ("Web::Mention");
-my $source = 'file://' . "$FindBin::Bin/sources/valid.html";
+my $source = 'file://' . "$FindBin::Bin/sources/content_property.html";
 my $target = "http://example.com/webmention-target";
 
 my $wm = Web::Mention->new(
@@ -30,5 +30,7 @@ is ($unserialized_wm->source, $source,
 ok ($unserialized_wm->is_tested,
     'Unserialized webmention remembers its is_tested status.',
 );
+
+diag ($unserialized_wm->content);
 
 done_testing();
