@@ -31,6 +31,4 @@ ok ($unserialized_wm->is_tested,
     'Unserialized webmention remembers its is_tested status.',
 );
 
-diag ($unserialized_wm->content);
-
 done_testing();

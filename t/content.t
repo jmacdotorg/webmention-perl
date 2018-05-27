@@ -2,6 +2,7 @@ use warnings; use strict;
 use Test::More;
 use Test::Exception;
 use FindBin;
+use utf8;
 
 use_ok ("Web::Mention");
 
@@ -27,7 +28,7 @@ my $target = "http://example.com/webmention-target";
         target => $target,
     );
     my $content = $wm->content;
-    like( $content, qr/Hooray!/ );
+    like( $content, qr/🤠 Howdy, I’m/ );
     unlike( $content, qr/Antwerp/ );
 
 }
