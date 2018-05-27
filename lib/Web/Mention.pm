@@ -302,8 +302,13 @@ sub _build_content {
     }
 
     unless ( $item ) {
-        my $title = Mojo::DOM58->new( $self->source_html )->at('title')->text;
-        return $title;
+        my $title = Mojo::DOM58->new( $self->source_html )->at('title');
+        if ($title) {
+            return $title->text;
+        }
+        else {
+            return undef;
+        }
     }
 
     my $raw_content;
