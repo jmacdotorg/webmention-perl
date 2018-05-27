@@ -45,6 +45,7 @@ has 'source_mf2_document' => (
     isa => 'Maybe[Web::Microformats2::Document]',
     is => 'rw',
     lazy_build => 1,
+    clearer => '_clear_mf2',
 );
 
 has 'target' => (
@@ -87,6 +88,7 @@ has 'author' => (
     isa => 'Maybe[Web::Mention::Author]',
     is => 'ro',
     lazy_build => 1,
+    clearer => '_clear_author',
 );
 
 has 'type' => (
@@ -101,6 +103,7 @@ has 'content' => (
     isa => 'Maybe[Str]',
     is => 'ro',
     lazy_build => 1,
+    clearer => '_clear_content',
 );
 
 has 'response' => (
@@ -193,6 +196,9 @@ sub verify {
     ) {
         $self->time_verified( DateTime->now );
         $self->source_html( $response->decoded_content );
+        $self->_clear_mf2;
+        $self->_clear_content;
+        $self->_clear_author;
         return 1;
     }
     else {
