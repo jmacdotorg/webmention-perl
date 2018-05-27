@@ -15,6 +15,7 @@ use Carp qw(carp croak);
 use Mojo::DOM58;
 use URI::Escape;
 use Carp qw(croak);
+use Encode qw(decode_utf8);
 
 use Web::Microformats2::Parser;
 use Web::Mention::Author;
@@ -417,10 +418,12 @@ sub TO_JSON {
     	$return_ref->{ is_tested } = $self->is_tested;
     	$return_ref->{ is_verified } = $self->is_verified;
 	    $return_ref->{ type } = $self->type;
-    	$return_ref->{ time_verified} = $self->time_verified->epoch;
+    	$return_ref->{ time_verified } = $self->time_verified->epoch;
+    	$return_ref->{ content } = $self->content;
+    	$return_ref->{ source_html } = $self->source_html;
 	    if ( $self->source_mf2_document ) {
     	    $return_ref->{ mf2_document_json } =
-	    	$self->source_mf2_document->as_json;
+	    	decode_utf8($self->source_mf2_document->as_json);
     	}
     	else {
 	        $return_ref->{ mf2_document_json } = undef;
