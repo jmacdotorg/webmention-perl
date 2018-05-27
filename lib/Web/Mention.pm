@@ -446,9 +446,10 @@ sub FROM_JSON {
     my ( $data_ref ) = @_;
 
     foreach ( qw( time_received time_verified ) ) {
-	if ( defined $data_ref->{ $_ } ) {
-	    $data_ref->{ $_ } = DateTime->from_epoch( epoch => $data_ref->{ $_ } );
-	}
+    	if ( defined $data_ref->{ $_ } ) {
+    	    $data_ref->{ $_ } =
+    	        DateTime->from_epoch( epoch => $data_ref->{ $_ } );
+    	}
     }
 
     my $webmention = $class->new( $data_ref );
