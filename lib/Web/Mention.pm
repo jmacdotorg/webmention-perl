@@ -19,7 +19,7 @@ use Encode qw(decode_utf8);
 use Web::Microformats2::Parser;
 use Web::Mention::Author;
 
-our $VERSION = '0.4';
+our $VERSION = '0.5';
 
 has 'source' => (
     isa => Uri,
@@ -638,6 +638,20 @@ example.
 Throws an exception if the given argument doesn't meet this requirement,
 or if it does but does not define both required HTTP parameters.
 
+=head3 FROM_JSON
+
+ $wm = Web::Mention->FROM_JSON( JSON::decode_json(
+ $serialized_webmention ) );
+
+Converts an unblessed hash reference resulting from an earlier
+serialization (via L<JSON>) into a fully fledged Web::Mention object.
+See L<"SERIALIZATION">.
+
+The all-caps spelling comes from a perhaps-misguided attempt to pair
+well with the TO_JSON method that L<JSON> requires. As such, this method
+may end up deprecated in favor of a less convoluted approach in future
+releases of this module.
+
 =head3 content_truncation_marker
 
  Web::Mention->content_truncation_marker( $new_truncation_marker )
@@ -695,6 +709,13 @@ target. On success, returns a L<URI> object. On failure, returns undef.
 (If the endpoint is set to localhost or a loopback IP, will return undef
 and also emit a warning, because that's terribly rude behavior on the
 target's part.)
+
+=head3 is_tested
+
+ $bool = $wm->is_tested;
+
+Returns 1 if this object's C<verify()> method has been called at least
+once, regardless of the results of that call. Returns 0 otherwise.
 
 =head3 is_verified
 
@@ -770,6 +791,20 @@ returns undef.
 
 Returns the webmention's target URL, as a L<URI> object.
 
+=head3 time_received
+
+ $dt = $wm->time_received;
+
+A L<DateTime> object corresponding to this object's creation time.
+
+=head3 time_verified
+
+ $dt = $wm->time_verified;
+
+If this webmention has been verified, then this will return a
+L<DateTime> object corresponding to the time of verification.
+(Otherwise, returns undef.)
+
 =head3 type
 
  $type = $wm->type;
@@ -799,6 +834,20 @@ repost
 quotation
 
 =back
+
+=head1 SERIALIZATION
+
+To serialize a Web::Mention object into JSON, enable <the JSON module's
+"convert_blessed" fetaure|JSON/"convert_blessed">, and then use one of
+that module's JSON-encoding functions on this object. This will result
+in a JSON string containing all the pertinent information about the
+webmention, including its verification status, any content and metadata
+fetched from the target, and so on.
+
+To unserialize a Web::Mention object serialized in this way, first
+decode it into an unblessed hash reference via L<JSON>, and then pass
+that as the single argument to L<the FROM_JSON class
+method|"FROM_JSON">.
 
 =head1 NOTES AND BUGS
 
@@ -841,12 +890,12 @@ This is free software, licensed under:
 =head1 A PERSONAL REQUEST
 
 My ability to share and maintain free, open-source software like this
-depends upon my living in a society that allows me the time, attention,
-and personal liberty to create work benefiting people other than just
-myself or my immediate family. I recognize that I got a head start on
-this due to an accident of birth, and with humility I strive to convert
-some of my unclaimed time and attention into work that, I hope, gives
-back to society in some small way.
+depends upon my living in a society that allows me the free time and
+personal liberty to create work benefiting people other than just myself
+or my immediate family. I recognize that I got a head start on this due
+to an accident of birth, and I strive to convert some of my unclaimed
+time and attention into work that, I hope, gives back to society in some
+small way.
 
 Worryingly, I find myself today living in a country experiencing a
 profound and unwelcome political upheaval, with its already flawed
