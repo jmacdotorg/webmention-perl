@@ -14,6 +14,7 @@ requires "Web::Microformats2", "0.3";
 requires "Scalar::Util";
 requires "List::Util";
 requires "URI::Escape";
+requires "Encode";
 
 on 'test' => sub {
     requires "Test::More";
