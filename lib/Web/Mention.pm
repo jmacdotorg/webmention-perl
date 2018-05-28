@@ -837,7 +837,7 @@ quotation
 
 =head1 SERIALIZATION
 
-To serialize a Web::Mention object into JSON, enable <the JSON module's
+To serialize a Web::Mention object into JSON, enable L<the JSON module's
 "convert_blessed" fetaure|JSON/"convert_blessed">, and then use one of
 that module's JSON-encoding functions on this object. This will result
 in a JSON string containing all the pertinent information about the
