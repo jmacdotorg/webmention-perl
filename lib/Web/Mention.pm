@@ -14,7 +14,6 @@ use Scalar::Util;
 use Carp qw(carp croak);
 use Mojo::DOM58;
 use URI::Escape;
-use Carp qw(croak);
 use Encode qw(decode_utf8);
 
 use Web::Microformats2::Parser;
@@ -179,6 +178,30 @@ sub new_from_request {
 
     return $class->new( %new_args );
 }
+
+sub new_from_html {
+    my $class = shift;
+
+    my %args = @_;
+    my $source = $args{ source };
+    my $html = $args{ html };
+
+    unless ($source) {
+        croak "You must define a source URL when calling new_from_html.";
+    }
+
+    my @webmentions;
+
+    my $dom = Mojo::DOM58->new( $html );
+    my $nodes_ref = $dom->find( 'a[href]' );
+    for my $node ( @$nodes_ref ) {
+        push @webmentions,
+            $class->new( source => $source, target => $node->attr( 'href' ) );
+    }
+
+    return @webmentions;
+}
+
 
 sub verify {
     my $self = shift;
@@ -530,7 +553,7 @@ Web::Mention - Implementation of the IndieWeb Webmention protocol
 
  $wm = Web::Mention->new(
     source => $url_of_the_thing_that_got_mentioned,
-    target => $url_of_the_thing_that_did_the_mentioning
+    target => $url_of_the_thing_that_did_the_mentioning,
  );
 
  my $success = $wm->send;
@@ -541,6 +564,17 @@ Web::Mention - Implementation of the IndieWeb Webmention protocol
      say "The webmention wasn't sent successfully.";
      say "Here's the response we got back..."
      say $wm->response->as_string;
+ }
+
+ # Batch-sending a bunch of webmentions based on some published HTML
+
+ my @wms = Web::Mention->new_from_html(
+    source => $url_of_a_web_page_i_just_published,
+    html   => $relevant_html_content_of_that_web_page,
+ )
+
+ for my $wm ( @wms ) {
+    my $success = $wm->send;
  }
 
 =head1 DESCRIPTION
@@ -572,6 +606,21 @@ of the document that made the mention described here, and B<target>
 describes the location of the document that got mentioned. The two
 arguments cannot refer to the same URL (disregarding the C<#fragment>
 part of either, if present).
+
+=head3 new_from_html
+
+ @wms = Web::Mention->new_from_html( source => $source_url, html =>
+ $html );
+
+Convenience batch-construtor that returns a (possibly empty) I<list> of
+Web::Mention objects based on the single source URL (or I<URI> object)
+that you pass in, as well as a string containing HTML from which we can
+extract zero or more target URLs. These extracted URLs include the
+C<href> attribute value of every E<lt>aE<gt> tag in the provided HTML.
+
+Note that (as with all this class's constructors) this method won't
+proceed to actually send the generated webmentions; that step remains
+yours to take. (See L<"send">.)
 
 =head3 new_from_request
 
