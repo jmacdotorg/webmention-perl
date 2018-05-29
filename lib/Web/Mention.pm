@@ -19,7 +19,7 @@ use Encode qw(decode_utf8);
 use Web::Microformats2::Parser;
 use Web::Mention::Author;
 
-our $VERSION = '0.5.1';
+our $VERSION = '0.501';
 
 has 'source' => (
     isa => Uri,
