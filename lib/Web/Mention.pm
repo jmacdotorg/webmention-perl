@@ -529,7 +529,6 @@ Web::Mention - Implementation of the IndieWeb Webmention protocol
          $name = $wm->source->host;
      }
 
-
      if ( $wm->is_like ) {
          say "Hooray, $name likes $target!";
      }
@@ -584,9 +583,11 @@ the IndieWeb community. (See: L<https://indieweb.org/Webmention>)
 
 An object of this class represents a single webmention, with target and
 source URLs. It can verify itself, determining whether or not the
-document found at the source URL does indeed mention the target URL. It
-can also use the Indieweb authorship algorithm to identify and describe
-the author of source document, if possible.
+document found at the source URL does indeed mention the target URL.
+
+It can also use IndieWeb algorithms to attempt identification of the
+source document's author, and to provide a short summary of that
+document's content, using Microformats2 metadata when available.
 
 =head1 METHODS
 
@@ -845,7 +846,7 @@ quotation
 =head1 SERIALIZATION
 
 To serialize a Web::Mention object into JSON, enable L<the JSON module's
-"convert_blessed" fetaure|JSON/"convert_blessed">, and then use one of
+"convert_blessed" feature|JSON/"convert_blessed">, and then use one of
 that module's JSON-encoding functions on this object. This will result
 in a JSON string containing all the pertinent information about the
 webmention, including its verification status, any content and metadata
@@ -924,11 +925,11 @@ you don't have to.)
 
 =item *
 
-L<The American Civil Liberties Union|http://aclu.org>
+L<The American Civil Liberties Union|https://aclu.org>
 
 =item *
 
-L<The Democratic National Committee|http://democrats.org>
+L<The Democratic National Committee|https://democrats.org>
 
 =item *
 
