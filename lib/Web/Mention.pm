@@ -19,7 +19,7 @@ use Encode qw(decode_utf8);
 use Web::Microformats2::Parser;
 use Web::Mention::Author;
 
-our $VERSION = '0.5';
+our $VERSION = '0.5.1';
 
 has 'source' => (
     isa => Uri,
@@ -594,7 +594,9 @@ the author of source document, if possible.
 
 =head3 new
 
- $wm = Web::Mention->new( source => $source_url, target => $target_url
+ $wm = Web::Mention->new(
+    source => $source_url,
+    target => $target_url,
  );
 
 Basic constructor. The B<source> and B<target> URLs are both required
@@ -609,8 +611,10 @@ part of either, if present).
 
 =head3 new_from_html
 
- @wms = Web::Mention->new_from_html( source => $source_url, html =>
- $html );
+ @wms = Web::Mention->new_from_html(
+    source => $source_url,
+    html   => $html,
+ );
 
 Convenience batch-construtor that returns a (possibly empty) I<list> of
 Web::Mention objects based on the single source URL (or I<URI> object)
@@ -640,8 +644,11 @@ or if it does but does not define both required HTTP parameters.
 
 =head3 FROM_JSON
 
- $wm = Web::Mention->FROM_JSON( JSON::decode_json(
- $serialized_webmention ) );
+ use JSON;
+
+ $wm = Web::Mention->FROM_JSON(
+    JSON::decode_json( $serialized_webmention )
+ );
 
 Converts an unblessed hash reference resulting from an earlier
 serialization (via L<JSON>) into a fully fledged Web::Mention object.
