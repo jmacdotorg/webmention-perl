@@ -806,7 +806,7 @@ Returns undef if this webmention instance hasn't tried to send itself.
 
  my $rsvp = $wm->rsvp_type;
 
-If this webmention is of L<"type"> C<rsvp>, then this method returns the
+If this webmention is of type C<rsvp> (see L<"type">, below), then this method returns the
 type of RSVP represented. It will be one of:
 
 =over
