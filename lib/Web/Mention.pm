@@ -22,7 +22,7 @@ use Web::Mention::Author;
 
 our $VERSION = '0.6';
 
-Readonly my @VALID_rsvp_typeS => qw(yes no maybe interested);
+Readonly my @VALID_RSVP_TYPES => qw(yes no maybe interested);
 
 has 'source' => (
     isa => Uri,
@@ -382,7 +382,7 @@ sub _build_rsvp_type {
     my $rsvp_type;
     if ( my $item = $self->source_mf2_document->get_first( 'h-entry' ) ) {
         if ( my $rsvp_property = $item->get_property( 'rsvp' ) ) {
-            if ( grep { $_ eq lc $rsvp_property } @VALID_rsvp_typeS ) {
+            if ( grep { $_ eq lc $rsvp_property } @VALID_RSVP_TYPES ) {
                 $rsvp_type = $rsvp_property;
             }
         }
