@@ -292,16 +292,18 @@ sub _build_type {
     my $item = $self->source_mf2_document->get_first( 'h-entry' );
     return 'mention' unless $item;
 
-    if ( $item->get_property( 'in-reply-to' ) ) {
-        return 'reply';
-    }
-    elsif ( $item->get_property( 'like-of' ) ) {
-        return 'like';
-    }
-    elsif ( $item->get_property( 'repost-of' )) {
+    # This order is comes from the W3C Post Type Detection algorithm:
+    # https://www.w3.org/TR/post-type-discovery/#response-algorithm
+    if ( $self->_check_url_property( $item, 'repost-of' )) {
         return 'repost';
     }
-    elsif ( $item->get_property( 'quotation-of' )) {
+    elsif ( $self->_check_url_property( $item, 'like-of' ) ) {
+        return 'like';
+    }
+    elsif ( $self->_check_url_property( $item, 'in-reply-to' ) ) {
+        return 'reply';
+    }
+    elsif ( $self->_check_url_property( $item, 'quotation-of' )) {
         return 'quotation';
     }
     else {
@@ -357,6 +359,19 @@ sub _build_content {
     }
 
     return $self->_truncate_content( $item->value );
+}
+
+sub _check_url_property {
+    my $self = shift;
+    my ( $item, $property ) = @_;
+
+    my $url = $item->get_property( $property );
+    if ( $url && $url eq $self->target ) {
+        return 1;
+    }
+    else {
+        return 0;
+    }
 }
 
 sub _truncate_content {
