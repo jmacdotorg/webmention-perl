@@ -262,6 +262,20 @@ itself.
 
 Returns undef if this webmention instance hasn't tried to send itself.
 
+### rsvp\_type
+
+    my $rsvp = $wm->rsvp_type;
+
+If this webmention is of type `rsvp` (see ["type"](#type), below), then this method returns the
+type of RSVP represented. It will be one of:
+
+- yes
+- no
+- maybe
+- interested
+
+Otherwise, returns undef.
+
 ### send
 
     my $bool = $wm->send;
@@ -329,6 +343,11 @@ The type of webmention this is. One of:
 - like
 - repost
 - quotation
+- rsvp
+
+This list is based on the W3C Post Type Discovery document
+(https://www.w3.org/TR/post-type-discovery/#response-algorithm), and
+adds a "quotation" type.
 
 # SERIALIZATION
 
@@ -346,8 +365,9 @@ method](#from_json).
 
 # NOTES AND BUGS
 
-This software is **alpha**; its author is still determining how it wants
-to work, and its interface might change dramatically.
+This software is **beta**; its interface continues to develop and remains
+subject to change, but not without some effort at supporting its current
+API.
 
 This library does not, at this time, support [the proposed "Vouch"
 anti-spam extension for Webmention](https://indieweb.org/Vouch).

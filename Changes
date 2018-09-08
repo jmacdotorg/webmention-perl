@@ -2,6 +2,8 @@ Revision history for Web::Mention
 
 {{$NEXT}}
 
+0.6 2018-09-08T20:36:53Z
+
     - Adding support for RSVP webmention types.
     
     - Improving post type discovery, according to a W3C-published
