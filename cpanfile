@@ -8,7 +8,7 @@ requires "MooseX::ClassAttribute";
 requires "MooseX::Enumeration";
 requires "MooseX::Types::URI";
 requires "Path::Class::Dir";
-requires "Readonly",
+requires "Readonly";
 requires "String::Truncate";
 requires "Try::Tiny";
 requires "Types::Standard";
