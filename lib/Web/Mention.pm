@@ -301,7 +301,7 @@ sub _build_type {
     my $item = $self->source_mf2_document->get_first( 'h-entry' );
     return 'mention' unless $item;
 
-    # This order is comes from the W3C Post Type Detection algorithm:
+    # This order comes from the W3C Post Type Detection algorithm:
     # https://www.w3.org/TR/post-type-discovery/#response-algorithm
     # ...except adding 'quotation' as a final allowed type, before
     # defaulting to 'mention'.
@@ -942,7 +942,8 @@ method|"FROM_JSON">.
 =head1 NOTES AND BUGS
 
 This software is B<beta>; its interface continues to develop and remains
-subject to change, but not without some effort at supporting its current API.
+subject to change, but not without some effort at supporting its current
+API.
 
 This library does not, at this time, support L<the proposed "Vouch"
 anti-spam extension for Webmention|https://indieweb.org/Vouch>.
