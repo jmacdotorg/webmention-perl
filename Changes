@@ -2,6 +2,14 @@ Revision history for Web::Mention
 
 {{$NEXT}}
 
+    - Adding support for RSVP webmention types.
+    
+    - Improving post type discovery, according to a W3C-published
+    algorithm
+    (https://www.w3.org/TR/post-type-discovery/#response-algorithm).
+    This fixes a bug that would mis-type webmentions in source documents
+    containing a mix of marked-up link types.
+
 0.501 2018-05-29T13:32:33Z
 
     - Documentation cleanup.
@@ -22,7 +30,8 @@ Revision history for Web::Mention
 
 0.4 2018-05-10T04:34:13Z
 
-    - Adding support for webmention sending. (Passes all create / update / delete tests on http://webmention.rocks, as of May 9, 2018.)
+    - Adding support for webmention sending. (Passes all create / update
+    / delete tests on http://webmention.rocks, as of May 9, 2018.)
     
     - Tidier construction of author objects.
     
