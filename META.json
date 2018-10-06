@@ -59,7 +59,7 @@
             "Try::Tiny" : "0",
             "Types::Standard" : "0",
             "URI::Escape" : "0",
-            "Web::Microformats2" : "0.3",
+            "Web::Microformats2" : "0.5",
             "perl" : "v5.10.0"
          }
       },
@@ -85,7 +85,7 @@
          "web" : "https://github.com/jmacdotorg/webmention-perl"
       }
    },
-   "version" : "0.6",
+   "version" : "0.7",
    "x_contributors" : [
       "Jason McIntosh <jmac@jmac.org>",
       "Mohammad S Anwar <mohammad.anwar@yahoo.com>"

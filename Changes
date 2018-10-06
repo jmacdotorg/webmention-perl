@@ -2,6 +2,8 @@ Revision history for Web::Mention
 
 {{$NEXT}}
 
+0.7 2018-10-06T21:09:00Z
+
     - Improved handling of source documents containing multiple URL
     microformats. This fixes a bug where mentions of a specific type
     (e.g. likes) would incorrectly have the generic "mention" type set.
