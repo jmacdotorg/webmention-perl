@@ -2,6 +2,13 @@ Revision history for Web::Mention
 
 {{$NEXT}}
 
+    - Improved handling of source documents containing multiple URL
+    microformats. This fixes a bug where mentions of a specific type
+    (e.g. likes) would incorrectly have the generic "mention" type set.
+
+    - Cleaner response to asking for the content of content-free
+    webmentions.
+    
 0.6 2018-09-08T20:36:53Z
 
     - Adding support for RSVP webmention types.

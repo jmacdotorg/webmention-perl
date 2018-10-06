@@ -27,7 +27,8 @@ my @wms = Web::Mention->new_from_html(
 
 for my $type ( @types ) {
     my @type_wms = grep { $_->type eq $type } @wms;
-    is (scalar @type_wms, 1, "Found exactly one '$type' webmention.");
+    my $expected = $type eq 'like'? 2 : 1;
+    is (scalar @type_wms, $expected, "Found exactly $expected '$type' webmention(s).");
     is ($type_wms[0]->target, target_url_for_type( $type ), "That webmention has the expected target URL.");
 }
 

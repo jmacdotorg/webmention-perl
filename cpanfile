@@ -12,7 +12,7 @@ requires "Readonly";
 requires "String::Truncate";
 requires "Try::Tiny";
 requires "Types::Standard";
-requires "Web::Microformats2", "0.3";
+requires "Web::Microformats2", "0.5";
 requires "Scalar::Util";
 requires "List::Util";
 requires "URI::Escape";

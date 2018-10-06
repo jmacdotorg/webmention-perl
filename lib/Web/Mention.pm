@@ -20,7 +20,7 @@ use Readonly;
 use Web::Microformats2::Parser;
 use Web::Mention::Author;
 
-our $VERSION = '0.6';
+our $VERSION = '0.7';
 
 Readonly my @VALID_RSVP_TYPES => qw(yes no maybe interested);
 
@@ -305,6 +305,7 @@ sub _build_type {
     # https://www.w3.org/TR/post-type-discovery/#response-algorithm
     # ...except adding 'quotation' as a final allowed type, before
     # defaulting to 'mention'.
+
     if ( $self->rsvp_type
          && $self->_check_url_property( $item, 'in-reply-to' ) ) {
         return 'rsvp';
@@ -395,18 +396,25 @@ sub _check_url_property {
     my $self = shift;
     my ( $item, $property ) = @_;
 
-    my $url = $item->get_property( $property );
-    if ( $url && $url eq $self->target ) {
-        return 1;
+    my $urls_ref = $item->get_properties( $property );
+    my $found = 0;
+
+    for my $url ( @$urls_ref ) {
+        if ( $url eq $self->target ) {
+            $found = 1;
+            last;
+        }
     }
-    else {
-        return 0;
-    }
+
+    return $found;
 }
 
 sub _truncate_content {
     my $self = shift;
     my ( $content ) = @_;
+    unless ( defined $content ) {
+        $content = q{};
+    }
 
     return elide(
         $content,
@@ -624,7 +632,10 @@ Web::Mention - Implementation of the IndieWeb Webmention protocol
 =head1 DESCRIPTION
 
 This class implements the Webmention protocol, as defined by the W3C and
-the IndieWeb community. (See: L<https://indieweb.org/Webmention>)
+the IndieWeb community. (See L<This article by Chris
+Aldrich|https://alistapart.com/article/webmentions-enabling-better-
+communication-on-the-internet> for an excellent high-level summary of
+Webmention and its applications.)
 
 An object of this class represents a single webmention, with target and
 source URLs. It can verify itself, determining whether or not the
