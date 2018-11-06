@@ -2,6 +2,7 @@ requires "DateTime";
 requires "Encode";
 requires "HTTP::Link";
 requires "LWP";
+requires "LWP::Protocol::https";
 requires "Mojo::DOM58";
 requires "Moose";
 requires "MooseX::ClassAttribute";
