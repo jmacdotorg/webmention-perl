@@ -2,6 +2,8 @@ Revision history for Web::Mention
 
 {{$NEXT}}
 
+0.701 2019-06-12T03:28:04Z
+
     - Improved handling for replies that encode their referent URLs as
     complete microformats (e.g. `h-cite`), rather than as simple
     property strings. This allows for proper handling of reply-context

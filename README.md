@@ -348,7 +348,7 @@ The type of webmention this is. One of:
 - rsvp
 
 This list is based on the W3C Post Type Discovery document
-(https://www.w3.org/TR/post-type-discovery/#response-algorithm), and
+([https://www.w3.org/TR/post-type-discovery/#response-algorithm](https://www.w3.org/TR/post-type-discovery/#response-algorithm)), and
 adds a "quotation" type.
 
 # SERIALIZATION
