@@ -2,6 +2,11 @@ Revision history for Web::Mention
 
 {{$NEXT}}
 
+    - Improved handling for replies that encode their referent URLs as
+    complete microformats (e.g. `h-cite`), rather than as simple
+    property strings. This allows for proper handling of reply-context
+    (https://indieweb.org/reply-context).
+
 0.7 2018-10-06T21:09:00Z
 
     - Improved handling of source documents containing multiple URL

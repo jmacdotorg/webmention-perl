@@ -20,7 +20,7 @@ use Readonly;
 use Web::Microformats2::Parser;
 use Web::Mention::Author;
 
-our $VERSION = '0.7';
+our $VERSION = '0.701';
 
 Readonly my @VALID_RSVP_TYPES => qw(yes no maybe interested);
 
@@ -400,6 +400,9 @@ sub _check_url_property {
     my $found = 0;
 
     for my $url ( @$urls_ref ) {
+        if ( blessed($url) && $url->isa('Web::Microformats2::Item') ) {
+            $url = $url->value;
+        }
         if ( $url eq $self->target ) {
             $found = 1;
             last;
@@ -933,7 +936,7 @@ rsvp
 =back
 
 This list is based on the W3C Post Type Discovery document
-(https://www.w3.org/TR/post-type-discovery/#response-algorithm), and
+(L<https://www.w3.org/TR/post-type-discovery/#response-algorithm>), and
 adds a "quotation" type.
 
 =head1 SERIALIZATION
