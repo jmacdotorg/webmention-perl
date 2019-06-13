@@ -4,6 +4,9 @@ Revision history for Web::Mention
 
     - Adding a 'title' read-only attribute.
 
+    - Dropping support for the 'quotation' webmention type. It is
+    non-standard, and it never worked very well here anyway.
+
     - Fixing a bug that accidentally deleted structure from the
     source MF2 document representation in certain circumstances.
 

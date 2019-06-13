@@ -100,9 +100,9 @@ has 'author' => (
 );
 
 has 'type' => (
-    isa => Enum[qw(rsvp reply like repost quotation mention)],
+    isa => Enum[qw(rsvp reply like repost mention)],
     traits => ['Enumeration'],
-    handles => [qw(is_rsvp is_reply is_like is_repost is_quotation is_mention)],
+    handles => [qw(is_rsvp is_reply is_like is_repost is_mention)],
     is => 'ro',
     lazy_build => 1,
     clearer => '_clear_type',
@@ -313,8 +313,7 @@ sub _build_type {
 
     # This order comes from the W3C Post Type Detection algorithm:
     # https://www.w3.org/TR/post-type-discovery/#response-algorithm
-    # ...except adding 'quotation' as a final allowed type, before
-    # defaulting to 'mention'.
+    # before defaulting to 'mention'.
 
     if ( $self->rsvp_type
          && $self->_check_url_property( $item, 'in-reply-to' ) ) {
@@ -328,9 +327,6 @@ sub _build_type {
     }
     elsif ( $self->_check_url_property( $item, 'in-reply-to' ) ) {
         return 'reply';
-    }
-    elsif ( $self->_check_url_property( $item, 'quotation-of' )) {
-        return 'quotation';
     }
     else {
         return 'mention';
@@ -991,17 +987,12 @@ repost
 
 =item *
 
-quotation
-
-=item *
-
 rsvp
 
 =back
 
 This list is based on the W3C Post Type Discovery document
-(L<https://www.w3.org/TR/post-type-discovery/#response-algorithm>), and
-adds a "quotation" type.
+(L<https://www.w3.org/TR/post-type-discovery/#response-algorithm>).
 
 =head1 SERIALIZATION
 
