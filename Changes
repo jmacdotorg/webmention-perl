@@ -2,6 +2,11 @@ Revision history for Web::Mention
 
 {{$NEXT}}
 
+    - Adding a 'title' read-only attribute.
+
+    - Fixing a bug that accidentally deleted structure from the
+    source MF2 document representation in certain circumstances.
+
     - Fixing a bug where reverifying an already-verified webmention
     would not update its type.
 

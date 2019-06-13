@@ -115,6 +115,13 @@ has 'content' => (
     clearer => '_clear_content',
 );
 
+has 'title' => (
+    isa => 'Maybe[Str]',
+    is => 'ro',
+    lazy_build => 1,
+    clearer => '_clear_title',
+);
+
 has 'response' => (
     isa => 'HTTP::Response',
     is => 'rw',
@@ -231,6 +238,7 @@ sub verify {
         $self->source_html( $response->decoded_content );
         $self->_clear_mf2;
         $self->_clear_content;
+        $self->_clear_title;
         $self->_clear_author;
         $self->_clear_type;
         return 1;
@@ -345,13 +353,7 @@ sub _build_content {
     }
 
     unless ( $item ) {
-        my $title = Mojo::DOM58->new( $self->source_html )->at('title');
-        if ($title) {
-            return $title->text;
-        }
-        else {
-            return undef;
-        }
+        return $self->_title_element_content;
     }
 
     my $raw_content;
@@ -401,10 +403,15 @@ sub _check_url_property {
     my $urls_ref = $item->get_properties( $property );
     my $found = 0;
 
-    for my $url ( @$urls_ref ) {
-        if ( blessed($url) && $url->isa('Web::Microformats2::Item') ) {
-            $url = $url->value;
+    for my $url_prop ( @$urls_ref ) {
+        my $url;
+        if ( blessed($url_prop) && $url_prop->isa('Web::Microformats2::Item') ) {
+            $url = $url_prop->value;
         }
+        else {
+            $url = $url_prop;
+        }
+
         if ( $url eq $self->target ) {
             $found = 1;
             last;
@@ -491,6 +498,38 @@ sub _build_endpoint {
     }
     else {
         return $endpoint;
+    }
+}
+
+sub _build_title {
+    my $self = shift;
+
+    # If the source doc has an h-entry with a p-name, return that, truncated.
+    if ( $self->source_mf2_document ) {
+        my $entry = $self->source_mf2_document->get_first( 'h-entry' );
+        my $name;
+        if ( $entry ) {
+            $name = $entry->get_property( 'name' );
+        }
+        if ( $entry && $name ) {
+            return $self->_truncate_content( $name );
+        }
+    }
+
+    # Otherwise, try to return the HTML title element's content.
+    return $self->_title_element_content;
+
+}
+
+sub _title_element_content {
+    my $self = shift;
+
+    my $title = Mojo::DOM58->new( $self->source_html )->at('title');
+    if ($title) {
+        return $title->text;
+    }
+    else {
+        return undef;
     }
 }
 
@@ -753,9 +792,8 @@ this returns undef.
 
  $content = $wm->content;
 
-Returns a string representing this object's best determination of the
-I<display-ready> representation of this webmention's content, based on a
-number of factors.
+Returns a string containing this object's best determination of this
+webmention's I<display-ready> content, based on a number of factors.
 
 If the source document uses Microformats2 metadata and contains an
 C<h-entry> MF2 item, then returned content may come from a variety of
@@ -903,6 +941,30 @@ If this webmention has been verified, then this will return a
 L<DateTime> object corresponding to the time of verification.
 (Otherwise, returns undef.)
 
+=head3 title
+
+ my $title = $wm->title;
+
+Returns a string containing this object's best determination of the
+I<display-ready> title of this webmention's source document,
+considered separately from its content. (You can get its more complete
+content via the L<"content"> method.
+
+If the source document uses Microformats2 metadata and contains an
+C<h-entry> MF2 item, I<and> that item has a C<name> property, then this
+method will return the text content of that name property.
+
+If not, then it will return the content of the source document's
+E<lt>titleE<gt> element, with any further HTML stripped away.
+
+In any case, the string will get truncated if it's too long. See
+L<"max_content_length"> and L<"content_truncation_marker">.
+
+Note that in some circumstances, the title and content methods might
+return identical values. (If, for example, the source document defines
+an entry with an explicit name property and no summary or content
+properties.)
+
 =head3 type
 
  $type = $wm->type;
@@ -988,7 +1050,7 @@ Mohammad S Anwar (mohammad.anwar@yahoo.com)
 
 =head1 COPYRIGHT AND LICENSE
 
-This software is Copyright (c) 2018 by Jason McIntosh.
+This software is Copyright (c) 2018-2019 by Jason McIntosh.
 
 This is free software, licensed under:
 
