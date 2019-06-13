@@ -2,6 +2,8 @@ Revision history for Web::Mention
 
 {{$NEXT}}
 
+0.702 2019-06-13T21:13:55Z
+
     - Adding a 'title' read-only attribute.
 
     - Fixing a bug that accidentally deleted structure from the
