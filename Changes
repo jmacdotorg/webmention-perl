@@ -2,6 +2,9 @@ Revision history for Web::Mention
 
 {{$NEXT}}
 
+    - Fixing a bug where reverifying an already-verified webmention
+    would not update its type.
+
 0.701 2019-06-12T03:28:04Z
 
     - Improved handling for replies that encode their referent URLs as

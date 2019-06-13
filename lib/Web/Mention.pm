@@ -20,7 +20,7 @@ use Readonly;
 use Web::Microformats2::Parser;
 use Web::Mention::Author;
 
-our $VERSION = '0.701';
+our $VERSION = '0.702';
 
 Readonly my @VALID_RSVP_TYPES => qw(yes no maybe interested);
 
@@ -105,6 +105,7 @@ has 'type' => (
     handles => [qw(is_rsvp is_reply is_like is_repost is_quotation is_mention)],
     is => 'ro',
     lazy_build => 1,
+    clearer => '_clear_type',
 );
 
 has 'content' => (
@@ -231,6 +232,7 @@ sub verify {
         $self->_clear_mf2;
         $self->_clear_content;
         $self->_clear_author;
+        $self->_clear_type;
         return 1;
     }
     else {
