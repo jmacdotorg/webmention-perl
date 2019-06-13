@@ -20,7 +20,7 @@ foreach ( @types ) {
 my @expected_types = qw(
     reply
     mention
-    mention
+    quotation
     like
     like
     repost
@@ -52,6 +52,13 @@ for my $wm ( @wms ) {
     is ($wm->type, $expected_type);
     is ($wm->target, $expected_target);
 }
+
+#for my $type ( @expected_types ) {
+#    my @type_wms = grep { $_->type eq $type } @wms;
+#    my $expected = $type =~ 'like|reply'? 2 : 1;
+#    is (scalar @type_wms, $expected, "Found exactly $expected '$type' webmention(s).");
+#    is ($type_wms[0]->target, target_url_for_type( $type ), "That webmention has the expected target URL.");
+#}
 
 sub target_url_for_type {
     my ( $type ) = @_;
