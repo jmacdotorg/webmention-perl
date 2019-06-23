@@ -2,6 +2,8 @@ Revision history for Web::Mention
 
 {{$NEXT}}
 
+0.703 2019-06-23T17:07:03Z
+
     - Adding a 'time_published' read-only attribute.
 
 0.702 2019-06-13T21:13:55Z
