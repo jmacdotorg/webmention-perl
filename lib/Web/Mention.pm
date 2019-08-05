@@ -701,10 +701,9 @@ Web::Mention - Implementation of the IndieWeb Webmention protocol
 =head1 DESCRIPTION
 
 This class implements the Webmention protocol, as defined by the W3C and
-the IndieWeb community. (See L<This article by Chris
-Aldrich|https://alistapart.com/article/webmentions-enabling-better-
-communication-on-the-internet> for an excellent high-level summary of
-Webmention and its applications.)
+the IndieWeb community. (See L<this article by Chris
+Aldrich|https://alistapart.com/article/webmentions-enabling-better-communication-on-the-internet/>
+for an excellent high-level summary of Webmention and its applications.)
 
 An object of this class represents a single webmention, with target and
 source URLs. It can verify itself, determining whether or not the
