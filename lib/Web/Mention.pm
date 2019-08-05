@@ -21,7 +21,7 @@ use DateTime::Format::ISO8601;
 use Web::Microformats2::Parser;
 use Web::Mention::Author;
 
-our $VERSION = '0.703';
+our $VERSION = '0.704';
 
 Readonly my @VALID_RSVP_TYPES => qw(yes no maybe interested);
 
