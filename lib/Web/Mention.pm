@@ -489,7 +489,8 @@ sub _build_endpoint {
     if ( $response->header( 'Link' ) ) {
         my @header_links = HTTP::Link->parse( $response->header( 'Link' ) . '' );
         foreach (@header_links ) {
-            if ($_->{relation} eq 'webmention') {
+            my $relation = $_->{relation};
+            if ($relation && $relation eq 'webmention') {
                 $endpoint = $_->{iri};
             }
         }
