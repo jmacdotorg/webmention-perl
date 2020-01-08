@@ -426,10 +426,11 @@ Jason McIntosh (jmac@jmac.org)
 # CONTRIBUTORS
 
 - Mohammad S Anwar (mohammad.anwar@yahoo.com)
+- Tomaž Šolc (tomaz.solc@tablix.org)
 
 # COPYRIGHT AND LICENSE
 
-This software is Copyright (c) 2018-2019 by Jason McIntosh.
+This software is Copyright (c) 2018-2020 by Jason McIntosh.
 
 This is free software, licensed under:
 

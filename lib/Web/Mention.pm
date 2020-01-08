@@ -617,6 +617,8 @@ sub FROM_JSON {
 
 =pod
 
+=encoding UTF-8
+
 =head1 NAME
 
 Web::Mention - Implementation of the IndieWeb Webmention protocol
