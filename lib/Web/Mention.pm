@@ -1085,11 +1085,15 @@ Jason McIntosh (jmac@jmac.org)
 
 Mohammad S Anwar (mohammad.anwar@yahoo.com)
 
+=item *
+
+Tomaž Šolc (tomaz.solc@tablix.org)
+
 =back
 
 =head1 COPYRIGHT AND LICENSE
 
-This software is Copyright (c) 2018-2019 by Jason McIntosh.
+This software is Copyright (c) 2018-2020 by Jason McIntosh.
 
 This is free software, licensed under:
 
