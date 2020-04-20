@@ -848,7 +848,7 @@ target's part.)
 
  $bool = $wm->is_tested;
 
-Returns 1 if this object's C<verify()> method has been called at least
+Returns 1 if this object's L<"verify"> method has been called at least
 once, regardless of the results of that call. Returns 0 otherwise.
 
 =head3 is_verified
@@ -859,8 +859,8 @@ Returns 1 if the webmention's source document actually does seem to
 mention the target URL. Otherwise returns 0.
 
 The first time this is called on a given webmention object, it will try
-to fetch the source document at its designated URL. If it cannot fetch
-the document on this first attempt, this method returns 0.
+to fetch the source document at its designated URL by way of the
+L<"verify"> method.
 
 =head3 original_source
 
@@ -1011,6 +1011,19 @@ properties.)
  $type = $wm->type;
 
 The type of webmention this is. One of:
+
+=head3 verify
+
+ my $is_verified = $wm->verify
+
+This B<verifies> the webmention, confirming that the content located at
+the source URL contains the target URL. Returns 1 if so, and 0
+otherwise. Will also return 0 if it cannot fetch the content at all,
+after one try.
+
+Sets C<is_tested> to 1 as a side-effect.
+
+See also L<"is_verified">.
 
 =over
 
