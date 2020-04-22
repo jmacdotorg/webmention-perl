@@ -707,8 +707,9 @@ Web::Mention - Implementation of the IndieWeb Webmention protocol
 
 This class implements the Webmention protocol, as defined by the W3C and
 the IndieWeb community. (See L<this article by Chris
-Aldrich|https://alistapart.com/article/webmentions-enabling-better-communication-on-the-internet/>
-for an excellent high-level summary of Webmention and its applications.)
+Aldrich|https://alistapart.com/article/webmentions-enabling-better-
+communication-on-the-internet/> for an excellent high-level summary of
+Webmention and its applications.)
 
 An object of this class represents a single webmention, with target and
 source URLs. It can verify itself, determining whether or not the
@@ -889,8 +890,8 @@ Returns undef if this webmention instance hasn't tried to send itself.
 
  my $rsvp = $wm->rsvp_type;
 
-If this webmention is of type C<rsvp> (see L<"type">, below), then this method returns the
-type of RSVP represented. It will be one of:
+If this webmention is of type C<rsvp> (see L<"type">, below), then this
+method returns the type of RSVP represented. It will be one of:
 
 =over
 
@@ -928,6 +929,12 @@ If that whole process goes through successfully and the endpoint returns
 a success response (meaning that it has acknowledged the webmention, and
 most likely queued it for later processing), then this method returns
 true. Otherwise, it returns false.
+
+B<To determine why a webmention did not send itself successfully>, consult
+the value of C<response>. If it is defined, then you can call
+L<HTTP::Response> methods (such as C<code> or C<message>) to learn more
+about the problem. Otherwise, if C<response> is not defined, then the
+target URL did not advertise a Webmention endpoint.
 
 =head3 source
 

@@ -89,7 +89,7 @@
          "web" : "https://github.com/jmacdotorg/webmention-perl"
       }
    },
-   "version" : "0.704",
+   "version" : "0.705",
    "x_contributors" : [
       "Jason McIntosh <jmac@jmac.org>",
       "Mohammad S Anwar <mohammad.anwar@yahoo.com>",
