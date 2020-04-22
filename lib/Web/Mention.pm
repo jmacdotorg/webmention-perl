@@ -130,8 +130,9 @@ has 'title' => (
 );
 
 has 'response' => (
-    isa => 'HTTP::Response',
+    isa => 'Maybe[HTTP::Response]',
     is => 'rw',
+    clearer => '_clear_response',
 );
 
 class_has 'ua' => (
@@ -263,6 +264,7 @@ sub send {
     my $target = $self->target;
 
     unless ( $endpoint ) {
+        $self->_clear_response;
         return 0;
     }
 
