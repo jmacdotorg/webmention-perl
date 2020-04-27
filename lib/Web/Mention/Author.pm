@@ -1,34 +1,35 @@
 package Web::Mention::Author;
 
-use Moose;
-use MooseX::Types::URI qw(Uri);
-use MooseX::ClassAttribute;
+use Moo;
+use MooX::ClassAttribute;
+use Types::Standard qw(InstanceOf Str);
 use Try::Tiny;
 use LWP::UserAgent;
 use List::Util qw(first);
+use Scalar::Util qw(blessed);
 
 use Web::Microformats2::Parser;
 
 has 'name' => (
     is => 'ro',
-    isa => 'Str',
+    isa => Str,
 );
 
 has 'url' => (
     is => 'ro',
-    isa => Uri,
-    coerce => 1,
+    isa => InstanceOf['URI'],
+    coerce => sub { URI->new($_[0]) },
 );
 
 has 'photo' => (
     is => 'ro',
-    isa => Uri,
-    coerce => 1,
+    isa => InstanceOf['URI'],
+    coerce => sub { URI->new($_[0]) },
 );
 
 class_has 'parser' => (
     is => 'ro',
-    isa => 'Web::Microformats2::Parser',
+    isa => InstanceOf['Web::Microformats2::Parser'],
     default => sub { Web::Microformats2::Parser->new },
 );
 

@@ -1,16 +1,16 @@
 package Web::Mention;
 
-use Moose;
-use MooseX::ClassAttribute;
-use MooseX::Types::URI qw(Uri);
+use Moo;
+use MooX::ClassAttribute;
+use MooX::Enumeration;
+use Types::Standard qw(InstanceOf Maybe Str Bool Num Enum);
 use LWP;
 use HTTP::Link;
 use DateTime;
 use String::Truncate qw(elide);
 use Try::Tiny;
 use Types::Standard qw(Enum);
-use MooseX::Enumeration;
-use Scalar::Util;
+use Scalar::Util qw(blessed);
 use Carp qw(carp croak);
 use Mojo::DOM58;
 use URI::Escape;
@@ -21,88 +21,85 @@ use DateTime::Format::ISO8601;
 use Web::Microformats2::Parser;
 use Web::Mention::Author;
 
-our $VERSION = '0.705';
+our $VERSION = '0.710';
 
 Readonly my @VALID_RSVP_TYPES => qw(yes no maybe interested);
 
 has 'source' => (
-    isa => Uri,
+    isa => InstanceOf['URI'],
     is => 'ro',
     required => 1,
-    coerce => 1,
+    coerce => sub { URI->new($_[0]) },
 );
 
 has 'original_source' => (
-    isa => Uri,
-    is => 'ro',
-    lazy_build => 1,
-    coerce => 1,
+    isa => InstanceOf['URI'],
+    is => 'lazy',
+    coerce => sub { URI->new($_[0]) },
 );
 
 has 'source_html' => (
-    isa => 'Maybe[Str]',
+    isa => Maybe[Str],
     is => 'rw',
 );
 
 has 'source_mf2_document' => (
-    isa => 'Maybe[Web::Microformats2::Document]',
+    isa => Maybe[InstanceOf['Web::Microformats2::Document']],
     is => 'rw',
-    lazy_build => 1,
+    lazy => 1,
+    builder => '_build_source_mf2_document',
     clearer => '_clear_mf2',
 );
 
 has 'target' => (
-    isa => Uri,
+    isa => InstanceOf['URI'],
     is => 'ro',
     required => 1,
-    coerce => 1,
+    coerce => sub { URI->new($_[0]) },
 );
 
 has 'endpoint' => (
-    isa => 'Maybe[URI]',
-    is => 'ro',
-    lazy_build => 1,
+    isa => Maybe[InstanceOf['URI']],
+    is => 'lazy',
 );
 
 has 'is_tested' => (
-    isa => 'Bool',
+    isa => Bool,
     is => 'rw',
     default => 0,
 );
 
 has 'is_verified' => (
-    isa => 'Bool',
-    is => 'ro',
-    lazy_build => 1,
+    isa => Bool,
+    is => 'lazy',
 );
 
 has 'time_verified' => (
-    isa => 'DateTime',
+    isa => InstanceOf['DateTime'],
     is => 'rw',
 );
 
 has 'time_received' => (
-    isa => 'DateTime',
+    isa => InstanceOf['DateTime'],
     is => 'ro',
     default => sub{ DateTime->now },
 );
 
 has 'time_published' => (
-    isa => 'DateTime',
+    isa => InstanceOf['DateTime'],
     is => 'rw',
-    lazy_build => 1,
+    lazy => 1,
+    builder => '_build_time_published',
 );
 
 has 'rsvp_type' => (
-    isa => 'Maybe[Str]',
-    is => 'ro',
-    lazy_build => 1,
+    isa => Maybe[Str],
+    is => 'lazy',
 );
 
 has 'author' => (
-    isa => 'Maybe[Web::Mention::Author]',
-    is => 'ro',
-    lazy_build => 1,
+    isa => Maybe[InstanceOf['Web::Mention::Author']],
+    is => 'lazy',
     clearer => '_clear_author',
 );
 
@@ -110,45 +107,42 @@ has 'type' => (
     isa => Enum[qw(rsvp reply like repost quotation mention)],
     traits => ['Enumeration'],
     handles => [qw(is_rsvp is_reply is_like is_repost is_quotation is_mention)],
-    is => 'ro',
-    lazy_build => 1,
+    is => 'lazy',
     clearer => '_clear_type',
 );
 
 has 'content' => (
-    isa => 'Maybe[Str]',
-    is => 'ro',
-    lazy_build => 1,
+    isa => Maybe[Str],
+    is => 'lazy',
     clearer => '_clear_content',
 );
 
 has 'title' => (
-    isa => 'Maybe[Str]',
-    is => 'ro',
-    lazy_build => 1,
+    isa => Maybe[Str],
+    is => 'lazy',
     clearer => '_clear_title',
 );
 
 has 'response' => (
-    isa => 'Maybe[HTTP::Response]',
+    isa => Maybe[InstanceOf['HTTP::Response']],
     is => 'rw',
     clearer => '_clear_response',
 );
 
 class_has 'ua' => (
-    isa => 'LWP::UserAgent',
+    isa => InstanceOf['LWP::UserAgent'],
     is => 'rw',
     default => sub { LWP::UserAgent->new },
 );
 
 class_has 'max_content_length' => (
-    isa => 'Num',
+    isa => Num,
     is => 'rw',
     default => 200,
 );
 
 class_has 'content_truncation_marker' => (
-    isa => 'Str',
+    isa => Str,
     is => 'rw',
     default => '...',
 );
