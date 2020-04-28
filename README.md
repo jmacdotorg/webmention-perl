@@ -183,7 +183,7 @@ Defaults to `...`.
 Gets or sets the maximum length, in characters, of the content displayed
 by that object method prior to truncation. (See ["content"](#content).)
 
-Defaults to 200.
+Defaults to 280.
 
 ## Object Methods
 
