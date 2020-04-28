@@ -138,7 +138,7 @@ class_has 'ua' => (
 class_has 'max_content_length' => (
     isa => Num,
     is => 'rw',
-    default => 200,
+    default => 280,
 );
 
 class_has 'content_truncation_marker' => (
@@ -800,7 +800,7 @@ Defaults to C<...>.
 Gets or sets the maximum length, in characters, of the content displayed
 by that object method prior to truncation. (See L<"content">.)
 
-Defaults to 200.
+Defaults to 280.
 
 =head2 Object Methods
 
