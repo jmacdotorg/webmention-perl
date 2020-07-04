@@ -132,7 +132,10 @@ has 'response' => (
 class_has 'ua' => (
     isa => InstanceOf['LWP::UserAgent'],
     is => 'rw',
-    default => sub { LWP::UserAgent->new },
+    default => sub {
+        # Set the user-agent string to e.g. "Web::Mention/0.711"
+        LWP::UserAgent->new( agent => "$_[0]/$VERSION" );
+    },
 );
 
 class_has 'max_content_length' => (
