@@ -21,7 +21,7 @@ use DateTime::Format::ISO8601;
 use Web::Microformats2::Parser;
 use Web::Mention::Author;
 
-our $VERSION = '0.712';
+our $VERSION = '0.720';
 
 Readonly my @VALID_RSVP_TYPES => qw(yes no maybe interested);
 
@@ -99,7 +99,7 @@ has 'rsvp_type' => (
 );
 
 has 'author' => (
-    isa => Maybe[InstanceOf['Web::Mention::Author']],
+    isa => InstanceOf['Web::Mention::Author'],
     is => 'lazy',
     clearer => '_clear_author',
 );
@@ -304,7 +304,7 @@ sub _build_author {
         );
     }
     else {
-        return;
+        return Web::Mention::Author->new;
     }
 }
 

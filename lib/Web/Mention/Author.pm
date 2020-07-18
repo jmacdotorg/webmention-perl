@@ -52,7 +52,7 @@ sub new_from_mf2_document {
 
     # "If no h-entry, then there's no post to find authorship for, abort."
     unless ( $h_entry ) {
-        return;
+        return $class->new;
     }
 
     # "If the h-entry has an author property, use that."
@@ -132,7 +132,7 @@ sub new_from_mf2_document {
 
     }
 
-    return;
+    return $class->new;
 
 }
 
