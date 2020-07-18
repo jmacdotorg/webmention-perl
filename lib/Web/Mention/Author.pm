@@ -2,7 +2,7 @@ package Web::Mention::Author;
 
 use Moo;
 use MooX::ClassAttribute;
-use Types::Standard qw(InstanceOf Str);
+use Types::Standard qw(InstanceOf Str Maybe);
 use Try::Tiny;
 use LWP::UserAgent;
 use List::Util qw(first);
@@ -12,18 +12,18 @@ use Web::Microformats2::Parser;
 
 has 'name' => (
     is => 'ro',
-    isa => Str,
+    isa => Maybe[Str],
 );
 
 has 'url' => (
     is => 'ro',
-    isa => InstanceOf['URI'],
+    isa => Maybe[InstanceOf['URI']],
     coerce => sub { URI->new($_[0]) },
 );
 
 has 'photo' => (
     is => 'ro',
-    isa => InstanceOf['URI'],
+    isa => Maybe[InstanceOf['URI']],
     coerce => sub { URI->new($_[0]) },
 );
 
