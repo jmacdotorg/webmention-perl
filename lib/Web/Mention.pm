@@ -168,7 +168,7 @@ sub BUILD {
     }
 
     if ( $source->eq( $target ) ) {
-	die "Inavlid webmention; source and target have the same URL "
+	die "Invalid webmention; source and target have the same URL "
 	    . "($source)\n";
     }
 }
