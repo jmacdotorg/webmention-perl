@@ -31,9 +31,11 @@ sub handle_file {
         local $TODO = "We don't support the "
                       . $file->basename
                       . ' test yet.';
-        no warnings; # Even though this is TODO it still throws undef-warns :/
-        TODO: { ok( $author && $author->name eq 'John Doe' ) }
-        use warnings;
+
+        TODO: {
+            no warnings; # Even though this is TODO, it still throws warns...
+            ok( $author && $author->name eq 'John Doe' );
+        }
     }
     else {
         ok( $author && $author->name eq 'John Doe' );
