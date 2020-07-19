@@ -1132,6 +1132,10 @@ Mohammad S Anwar (mohammad.anwar@yahoo.com)
 
 =item *
 
+Yanick Champoux
+
+=item *
+
 Tomaž Šolc (tomaz.solc@tablix.org)
 
 =back
