@@ -22,7 +22,7 @@ use JSON;
 use Web::Microformats2::Parser;
 use Web::Mention::Author;
 
-our $VERSION = '0.720';
+our $VERSION = '0.721';
 
 Readonly my @VALID_RSVP_TYPES => qw(yes no maybe interested);
 
@@ -237,8 +237,7 @@ sub verify {
     # target URL in the source doc. We search for the latter to account for
     # sites like Tumblr, who treat outgoing hyperlinks as weird internally-
     # pointing links that pass external URLs as query-string parameters.
-    my $target = "$self->target";
-    if ( ($response->content =~ $self->target)
+    if ( ($response->content =~ quotemeta( $self->target ) )
          || ($response->content =~ uri_escape( $self->target ) )
     ) {
         $self->time_verified( DateTime->now );
