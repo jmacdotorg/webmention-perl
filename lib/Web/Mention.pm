@@ -219,8 +219,12 @@ sub new_from_html {
     my $dom = Mojo::DOM58->new( $html );
     my $nodes_ref = $dom->find( 'a[href]' );
     for my $node ( @$nodes_ref ) {
-        push @webmentions,
-            $class->new( source => $source, target => $node->attr( 'href' ) );
+        try {
+            push @webmentions,
+                $class->new(
+                    source => $source, target => $node->attr( 'href' )
+                );
+        };
     }
 
     return @webmentions;
